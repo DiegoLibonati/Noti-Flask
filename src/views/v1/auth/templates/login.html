@@ -1,0 +1,68 @@
+<!-- EXTENDS CSS -->
+
+{% extends 'base.html' %}
+
+<!-- END EXTENDS CSS -->
+
+<!-- LINK CSS -->
+
+{% block linkcss %} {% endblock linkcss %}
+
+<!-- END LINK CSS -->
+
+<!-- TITLE CSS -->
+
+{% block title %} Login {% endblock title %}
+
+<!-- END TITLE CSS -->
+
+<!-- CONTENT CSS -->
+
+{% block content %}
+
+<main class="c-main-login o-main-center-secondary">
+  <section class="c-container-wrapper-login o-container-center-screen">
+    <form method="POST" class="c-form c-form-login" action="{{ url_for(context['login_route']) }}">
+      <h2 class="c-form__title">Member Login</h2>
+
+      <input
+        class="c-form__input"
+        type="text"
+        id="username"
+        name="username"
+        placeholder="Username"
+      />
+
+      <input
+        class="c-form__input"
+        type="password"
+        id="password"
+        name="password"
+        placeholder="Your password"
+      />
+
+      <button class="c-form__action-login o-button-fill-primary" type="submit">
+        LOGIN
+      </button>
+      <a
+        class="c-form__action-create-account o-button-fill-primary"
+        href="{{ url_for(context['sign_up_view']) }}"
+        target="_self"
+      >
+        Create an account
+      </a>
+
+      <div class="c-form__wrapper-image">
+        <img
+          src="{{ url_for('static', filename='assets/person.png') }}"
+          alt="login image"
+          class="c-form__image"
+        />
+      </div>
+    </form>
+  </section>
+</main>
+
+{% endblock content %}
+
+<!-- END CONTENT CSS -->

@@ -1,0 +1,31 @@
+.o-button {
+  &-fill-primary {
+    width: 100%;
+    font-size: 1rem;
+    color: $white-color;
+    background-color: $primary-color;
+    border-radius: 0.5rem;
+    text-align: center;
+    padding: 1rem;
+    transition: 1s all;
+
+    &:hover {
+      background-color: rgba($primary-rgb-color, 0.8);
+    }
+  }
+
+  &-fill-secondary {
+    width: 100%;
+    font-size: 1rem;
+    color: $white-color;
+    background-color: $secondary-color;
+    border-radius: 0.5rem;
+    text-align: center;
+    padding: 1rem;
+    transition: 1s all;
+
+    &:hover {
+      background-color: rgba($secondary-rgb-color, 0.8);
+    }
+  }
+}

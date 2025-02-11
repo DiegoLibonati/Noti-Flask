@@ -1,0 +1,83 @@
+.c-form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 90%;
+  height: 30rem;
+  background-color: white;
+  padding: 1rem;
+  box-shadow: rgba($black-rgb-color, 0.2) 0rem 0.063rem 0.125rem 0rem;
+
+  @include md {
+    width: 40rem;
+  }
+
+  &-login {
+  }
+
+  &-register {
+  }
+
+  &__title {
+    font-size: 2rem;
+    font-weight: 400;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    background-color: $light-gray-color;
+
+    &::placeholder {
+      color: black;
+    }
+  }
+
+  &__action-login {
+  }
+
+  &__action-register {
+  }
+
+  &__action-create-account {
+    width: auto;
+    align-self: end;
+    text-decoration: none;
+  }
+
+  &__action-have-account {
+    width: auto;
+    align-self: end;
+    text-decoration: none;
+  }
+
+  &__wrapper-image {
+    position: absolute;
+    top: -2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 5rem;
+    width: 5rem;
+    border-radius: 100%;
+    background-color: $primary-color;
+    padding: 1rem;
+
+    @include md {
+      top: -3rem;
+      width: 6rem;
+      height: 6rem;
+      padding: 2rem;
+    }
+  }
+
+  &__image {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+  }
+}

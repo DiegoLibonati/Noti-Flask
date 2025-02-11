@@ -1,0 +1,48 @@
+.c-alert {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  height: auto;
+  width: 100%;
+  padding: 1rem;
+  box-shadow: rgba($black-rgb-color, 0.2) 0rem 0.063rem 0.125rem 0rem;
+
+  @include lg() {
+    width: 40%;
+    border-radius: 0.5rem;
+  }
+
+  &--success {
+    background-color: $success-color;
+  }
+
+  &--error {
+    background-color: $error-color;
+  }
+
+  &__wrapper-text {
+    align-self: center;
+    width: calc(100% - 2rem);
+    height: 100%;
+  }
+
+  &__text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $white-color;
+  }
+
+  &__btn-close {
+    display: flex;
+    width: 2rem;
+    height: 100%;
+
+    &-image {
+      height: 100%;
+      width: 100%;
+      fill: $white-color;
+    }
+  }
+}

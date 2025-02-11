@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+
+    <!-- LINK CSS -->
+
+    {% block linkcss %} {% endblock linkcss %}
+
+    <!-- END LINK CSS -->
+
+    <title>{% block title %} {% endblock title %}</title>
+  </head>
+  <body>
+    <!-- FLASH ALERT -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <ul class="c-alerts">
+      {% for category, message in messages %}
+      <li
+        class="c-alert c-alert--{{ category }} js-alert"
+        id="js-alert-{{loop.index}}"
+      >
+        <div class="c-alert__wrapper-text">
+          <h2 class="c-alert__text">{{ message }}</h2>
+        </div>
+
+        <button
+          type="button"
+          class="c-alert__btn-close js-close-alert"
+          id="js-close-alert-{{loop.index}}"
+        >
+          <img
+            src="{{ url_for('static', filename='assets/close-white.svg') }}"
+            alt="close alert"
+            class="c-alert__btn-close-image"
+          />
+        </button>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %} {% endwith %}
+
+    <!-- END FLASH ALERT -->
+
+    <!-- BLOCK CONTENT -->
+
+    {% block content %} {% endblock content %}
+
+    <!-- END BLOCK CONTENT -->
+
+    <!-- JS SCRIPTS -->
+
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/index.js') }}"
+    ></script>
+
+    {% block javascript %} {% endblock javascript %}
+
+    <!-- END JS SCRIPTS -->
+  </body>
+</html>
