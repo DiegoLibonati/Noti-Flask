@@ -9,6 +9,10 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/main.css') }}"
     />
+    <link
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/css/fontawesome.min.css"
+      rel="stylesheet"
+    />
 
     <!-- LINK CSS -->
 
@@ -35,6 +39,7 @@
 
         <button
           type="button"
+          aria-label="btn close alert"
           class="c-alert__btn-close js-close-alert"
           id="js-close-alert-{{loop.index}}"
         >
@@ -51,6 +56,68 @@
 
     <!-- END FLASH ALERT -->
 
+    <!-- HEADER -->
+
+    {% if context["user"].is_authenticated %}
+
+    <header class="c-header">
+      <div class="c-header__logo">
+        <div class="c-header__wrapper-title">
+          <h2 class="c-header__title">Noti</h2>
+        </div>
+
+        <div class="c-header__wrapper-actions">
+          <button
+            class="c-header__action c-header__action-open c-header__action--active js-open-navbar"
+            aria-label="btn open navbar"
+          >
+            <i class="fa fa-bars c-header__action-icon" aria-hidden="true"></i>
+          </button>
+          <button
+            class="c-header__action c-header__action-close js-close-navbar"
+            aria-label="btn close navbar"
+          >
+            <i class="fa fa-close c-header__action-icon" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+
+      <nav class="c-nav js-navbar">
+        <ul class="c-nav__list">
+          <li class="c-nav__item" title="Home">
+            <a
+              href=""
+              target="_self"
+              class="c-nav__link {{ 'c-nav__link--active' if context['current_route'] == 'Home' }}"
+              aria-label="home"
+            >
+              <div class="c-nav__wrapper-icon">
+                <i class="fa fa-home c-nav__icon" aria-hidden="true"></i>
+              </div>
+              <h2 class="c-nav__text">Home</h2>
+            </a>
+          </li>
+
+          <li class="c-nav__item" title="Logout">
+            <a
+              target="_self"
+              class="c-nav__link c-nav__logout js-btn-logout"
+              aria-label="home"
+            >
+              <div class="c-nav__wrapper-icon">
+                <i class="fa fa-sign-out c-nav__icon" aria-hidden="true"></i>
+              </div>
+              <h2 class="c-nav__text">Logout</h2>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    {% endif %}
+
+    <!-- END HEADER -->
+
     <!-- BLOCK CONTENT -->
 
     {% block content %} {% endblock content %}
@@ -63,6 +130,7 @@
       type="module"
       src="{{ url_for('static', filename='js/index.js') }}"
     ></script>
+    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.7.2/js/all.min.js"></script>
 
     {% block javascript %} {% endblock javascript %}
 

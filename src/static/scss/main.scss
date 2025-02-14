@@ -18,14 +18,20 @@
 // OBJECTS
 
 @import "objects/_o-button";
-@import "objects/_o-main";
 @import "objects/_o-container";
+@import "objects/_o-main";
 
 // COMPONENTS
 
 @import "components/_c-alert";
 @import "components/_c-alerts";
-@import "components/_c-form";
+@import "components/_c-button-add";
+@import "components/_c-form-auth";
+@import "components/_c-header";
+@import "components/_c-nav";
+@import "components/_c-note";
+@import "components/_c-notes";
+@import "components/_c-title";
 
 // UTILITIES
 

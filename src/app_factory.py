@@ -13,33 +13,36 @@ from src.data_access.user_repository import UserRepository
 from src.views.v1.auth.auth_views import auth_views
 from src.views.v1.app.app_views import app_views
 from src.blueprints.v1.auth_route import auth_route
+from src.blueprints.v1.notes_route import notes_route
+from src.utils.constants import STATIC_FOLDER_NAME
+from src.utils.constants import CSS_FOLDER_NAME
+from src.utils.constants import SCSS_FOLDER_NAME
+from src.utils.constants import GENERAL_TEMPLATES_FOLDER_NAME
+from src.utils.constants import AUTH_TEMPLATES_FOLDER_NAME
+from src.utils.constants import APP_TEMPLATES_FOLDER_NAME
+from src.utils.constants import GENERAL_VIEWS_FOLDER_NAME
+from src.utils.constants import AUTH_VIEWS_FOLDER_NAME
+from src.utils.constants import APP_VIEWS_FOLDER_NAME
+from src.utils.constants import VERSION_VIEWS
+from src.utils.constants import AUTH_BLUEPRINT_ROUTE_NAME
+from src.utils.constants import NOTES_BLUEPRINT_ROUTE_NAME
+from src.utils.constants import AUTH_VIEW_ROUTE_NAME
+from src.utils.constants import APP_VIEW_ROUTE_NAME
+from src.utils.constants import BLUEPRINT_AUTH_PATH
+from src.utils.constants import BLUEPRINT_NOTES_PATH
+from src.utils.constants import VIEW_AUTH_PATH
+from src.utils.constants import VIEW_APP_PATH
 
 
 # Vars
 ROOT_FILE_PATH = os.path.dirname(__file__)
 
-STATIC_FOLDER_NAME = "static"
-CSS_FOLDER_NAME = "css"
-SCSS_FOLDER_NAME = "scss"
-TEMPLATES_FOLDER_NAME = "templates"
-VIEWS_FOLDER_NAME = "views"
-AUTH_FOLDER_NAME = "auth"
-APP_FOLDER_NAME = "app"
-
-VERSION_BLUEPRINTS = "v1"
-VERSION_VIEWS = "v1"
-
-PREFIX_BLUEPRINTS_PATH = f"/{VERSION_BLUEPRINTS}/api"
-PREFIX_BLUEPRINT_AUTH_PATH = f"{PREFIX_BLUEPRINTS_PATH}/auth"
-PREFIX_BLUEPRINT_APP_PATH = f"{PREFIX_BLUEPRINTS_PATH}/app"
-
-PREFIX_VIEWS_PATH = f"/{VERSION_VIEWS}/views"
-PREFIX_VIEW_AUTH_PATH = f"{PREFIX_VIEWS_PATH}/auth"
-PREFIX_VIEW_APP_PATH = f"{PREFIX_VIEWS_PATH}/app"
-
 
 def setup_config(app: Flask) -> None:
     load_dotenv()
+
+    # App Config Globals
+    app.config["TESTING"] = False
 
     # App Config With App Envs
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
@@ -50,16 +53,15 @@ def setup_config(app: Flask) -> None:
     # App Config With Flask Envs
     app.config["FLASK_DEBUG"] = os.getenv("FLASK_DEBUG")
     app.config["FLASK_ENV"] = os.getenv("FLASK_ENV")
-    # app.config['TEMPLATES_AUTO_RELOAD'] = True
 
     # App Config Paths
     app.config["DB_PATH"] = os.path.join(ROOT_FILE_PATH, app.config['SQL_DB_NAME'])
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{app.config['DB_PATH']}"
     app.config["CSS_FOLDER_PATH"] = os.path.join(ROOT_FILE_PATH, STATIC_FOLDER_NAME, CSS_FOLDER_NAME)
     app.config["SCSS_FOLDER_PATH"] = os.path.join(ROOT_FILE_PATH, STATIC_FOLDER_NAME, SCSS_FOLDER_NAME)
-    app.config["GENERAL_TEMPLATES_FOLDER_PATH"] = os.path.join(ROOT_FILE_PATH, TEMPLATES_FOLDER_NAME)
-    app.config["APP_TEMPLATES_FOLDER_PATH"] = os.path.join(ROOT_FILE_PATH, VIEWS_FOLDER_NAME, VERSION_VIEWS, APP_FOLDER_NAME,  TEMPLATES_FOLDER_NAME)
-    app.config["AUTH_TEMPLATES_FOLDER_PATH"] = os.path.join(ROOT_FILE_PATH, VIEWS_FOLDER_NAME, VERSION_VIEWS, AUTH_FOLDER_NAME,  TEMPLATES_FOLDER_NAME)
+    app.config["GENERAL_TEMPLATES_FOLDER_PATH"] = os.path.join(ROOT_FILE_PATH, GENERAL_TEMPLATES_FOLDER_NAME)
+    app.config["APP_TEMPLATES_FOLDER_PATH"] = os.path.join(ROOT_FILE_PATH, GENERAL_VIEWS_FOLDER_NAME, VERSION_VIEWS, APP_VIEWS_FOLDER_NAME,  APP_TEMPLATES_FOLDER_NAME)
+    app.config["AUTH_TEMPLATES_FOLDER_PATH"] = os.path.join(ROOT_FILE_PATH, GENERAL_VIEWS_FOLDER_NAME, VERSION_VIEWS, AUTH_VIEWS_FOLDER_NAME,  AUTH_TEMPLATES_FOLDER_NAME)
 
     # App Config Template Names
     app.config["TEMPLATE_LOGIN_NAME"] = "login.html"
@@ -67,24 +69,30 @@ def setup_config(app: Flask) -> None:
     app.config["TEMPLATE_HOME_NAME"] = "home.html"
 
     # Blueprints
-    app.config["LOGIN_ROUTE"] = f"{AUTH_FOLDER_NAME}_route.login"
-    app.config["LOGIN_ROUTE_PATH"] = f"{PREFIX_BLUEPRINT_AUTH_PATH}/login"
+    app.config["LOGIN_ROUTE"] = f"{AUTH_BLUEPRINT_ROUTE_NAME}.login"
+    app.config["LOGIN_ROUTE_PATH"] = f"{BLUEPRINT_AUTH_PATH}/login"
 
-    app.config["LOGOUT_ROUTE"] = f"{AUTH_FOLDER_NAME}_route.logout"
-    app.config["LOGOUT_ROUTE_PATH"] = f"{PREFIX_BLUEPRINT_AUTH_PATH}/logout"
+    app.config["LOGOUT_ROUTE"] = f"{AUTH_BLUEPRINT_ROUTE_NAME}.logout"
+    app.config["LOGOUT_ROUTE_PATH"] = f"{BLUEPRINT_AUTH_PATH}/logout"
 
-    app.config["SIGN_UP_ROUTE"] = f"{AUTH_FOLDER_NAME}_route.sign_up"
-    app.config["SIGN_UP_ROUTE_PATH"] = f"{PREFIX_BLUEPRINT_AUTH_PATH}/sign_up"
+    app.config["SIGN_UP_ROUTE"] = f"{AUTH_BLUEPRINT_ROUTE_NAME}.sign_up"
+    app.config["SIGN_UP_ROUTE_PATH"] = f"{BLUEPRINT_AUTH_PATH}/sign_up"
+
+    app.config["CREATE_NOTE_ROUTE"] = f"{NOTES_BLUEPRINT_ROUTE_NAME}.create"
+    app.config["CREATE_NOTE_ROUTE_PATH"] = f"{BLUEPRINT_NOTES_PATH}/create"
+
+    app.config["DELETE_NOTE_ROUTE"] = f"{NOTES_BLUEPRINT_ROUTE_NAME}.delete"
+    app.config["DELETE_NOTE_ROUTE_PATH"] = f"{BLUEPRINT_NOTES_PATH}/delete"
     
     # Views
-    app.config["LOGIN_VIEW"] = f"{AUTH_FOLDER_NAME}_views.login"
-    app.config["LOGIN_VIEW_PATH"] = f"{PREFIX_VIEW_AUTH_PATH}/login"
+    app.config["LOGIN_VIEW"] = f"{AUTH_VIEW_ROUTE_NAME}.login"
+    app.config["LOGIN_VIEW_PATH"] = f"{VIEW_AUTH_PATH}/login"
 
-    app.config["SIGN_UP_VIEW"] = f"{AUTH_FOLDER_NAME}_views.sign_up"
-    app.config["SIGN_UP_VIEW_PATH"] = f"{PREFIX_VIEW_AUTH_PATH}/sign_up"
+    app.config["SIGN_UP_VIEW"] = f"{AUTH_VIEW_ROUTE_NAME}.sign_up"
+    app.config["SIGN_UP_VIEW_PATH"] = f"{VIEW_AUTH_PATH}/sign_up"
     
-    app.config["HOME_VIEW"] = f"{APP_FOLDER_NAME}_views.home"
-    app.config["HOME_VIEW_PATH"] = f"{PREFIX_VIEW_APP_PATH}/home"
+    app.config["HOME_VIEW"] = f"{APP_VIEW_ROUTE_NAME}.home"
+    app.config["HOME_VIEW_PATH"] = f"{VIEW_APP_PATH}/home"
 
     # Jinja Config
     app.jinja_env.add_extension('jinja2.ext.loopcontrols')
@@ -132,12 +140,13 @@ def setup_login(app: Flask) -> None:
 
 
 def register_blueprints(app: Flask) -> None:
-    app.register_blueprint(auth_route, url_prefix=PREFIX_BLUEPRINT_AUTH_PATH)
+    app.register_blueprint(auth_route, url_prefix=BLUEPRINT_AUTH_PATH)
+    app.register_blueprint(notes_route, url_prefix=BLUEPRINT_NOTES_PATH)
 
 
 def register_views(app: Flask) -> None:
-    app.register_blueprint(auth_views, url_prefix=PREFIX_VIEW_AUTH_PATH)
-    app.register_blueprint(app_views, url_prefix=PREFIX_VIEW_APP_PATH)
+    app.register_blueprint(auth_views, url_prefix=VIEW_AUTH_PATH)
+    app.register_blueprint(app_views, url_prefix=VIEW_APP_PATH)
 
 
 def create_app():

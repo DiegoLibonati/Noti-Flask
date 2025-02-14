@@ -1,13 +1,33 @@
 .o-button {
-  &-fill-primary {
+  cursor: pointer;
+  transition: 1s all;
+
+  &:active {
+    transform: scale(0.2);
+  }
+
+  &-full {
     width: 100%;
-    font-size: 1rem;
+    padding: 1rem;
+  }
+
+  &-rounded {
+    border-radius: 0.5rem;
+  }
+
+  &-rounded-full {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 100%;
+  }
+
+  &-fill-primary {
     color: $white-color;
     background-color: $primary-color;
-    border-radius: 0.5rem;
-    text-align: center;
-    padding: 1rem;
-    transition: 1s all;
+
 
     &:hover {
       background-color: rgba($primary-rgb-color, 0.8);
@@ -15,17 +35,20 @@
   }
 
   &-fill-secondary {
-    width: 100%;
-    font-size: 1rem;
     color: $white-color;
     background-color: $secondary-color;
-    border-radius: 0.5rem;
-    text-align: center;
-    padding: 1rem;
-    transition: 1s all;
 
     &:hover {
       background-color: rgba($secondary-rgb-color, 0.8);
+    }
+  }
+
+  &-fill-error {
+    color: $white-color;
+    background-color: $error-color;
+
+    &:hover {
+      background-color: rgba($error-rgb-color, 0.8);
     }
   }
 }

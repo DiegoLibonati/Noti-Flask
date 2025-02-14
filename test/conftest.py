@@ -12,6 +12,7 @@ from flask.testing import FlaskClient
 
 from src.app import app as api_app
 from src.data_access.user_repository import UserRepository
+from src.data_access.note_repository import NoteRepository
 from src.models.db.User import User
 from test.constants import MOCK_USER
 from test.constants import BLUEPRINTS
@@ -53,6 +54,12 @@ def blueprints() -> dict[str, Any]:
 def user_repository() -> UserRepository:
     return UserRepository()
 
+
+@pytest.fixture(scope="session")
+def note_repository() -> NoteRepository:
+    return NoteRepository()
+
+
 @pytest.fixture
 def captured_templates(flask_app: Flask) -> Generator[jinja2.environment.Template, None, dict[str, Any]]:
     recorded = []
@@ -65,6 +72,7 @@ def captured_templates(flask_app: Flask) -> Generator[jinja2.environment.Templat
         yield recorded
     finally:
         template_rendered.disconnect(record, flask_app)
+
 
 # MOCKS
 

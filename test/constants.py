@@ -1,6 +1,7 @@
 # CONFIG TEST
 BLUEPRINTS = {
     "auth": "/v1/api/auth",
+    "notes": "/v1/api/notes",
     "app_views": "/v1/views/app",
     "auth_views": "/v1/views/auth"
 }

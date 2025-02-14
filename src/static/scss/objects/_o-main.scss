@@ -6,25 +6,27 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    height: 100%;
   }
 
-  &-center-primary {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  &-primary {
     background-color: $primary-color;
-    width: 100%;
-    height: 100%;
   }
 
-  &-center-secondary {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  &-secondary {
     background-color: $secondary-color;
-    width: 100%;
-    height: 100%;
+  }
+
+  &-app {
+    padding: 1rem;
+    padding-top: 5rem;
+
+    @include lg() {
+      width: calc(100vw - 5.1rem);
+      min-height: 100vh;
+      margin-left: 4rem;
+      padding-top: 0rem;
+      padding: 1rem;
+      overflow: auto;
+    }
   }
 }

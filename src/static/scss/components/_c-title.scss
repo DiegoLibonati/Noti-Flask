@@ -1,0 +1,12 @@
+.c-title {
+  margin-bottom: 1rem;
+
+  &__text {
+    font-size: 2rem;
+    font-weight: 700;
+
+    @include lg() {
+      font-size: 3rem;
+    }
+  }
+}

@@ -20,13 +20,15 @@
 
 {% block content %}
 
-<main class="c-main-login o-main-center-secondary">
-  <section class="c-container-wrapper-login o-container-center-screen">
-    <form method="POST" class="c-form c-form-login" action="{{ url_for(context['login_route']) }}">
-      <h2 class="c-form__title">Member Login</h2>
+<main class="c-main-login o-main o-main-center o-main-secondary">
+  <section
+    class="c-container-wrapper-login o-container-center o-container-screen"
+  >
+    <form method="post" class="c-form-auth c-form-auth-login">
+      <h2 class="c-form-auth__title">Member Login</h2>
 
       <input
-        class="c-form__input"
+        class="c-form-auth__input js-input"
         type="text"
         id="username"
         name="username"
@@ -34,30 +36,31 @@
       />
 
       <input
-        class="c-form__input"
+        class="c-form-auth__input js-input"
         type="password"
         id="password"
         name="password"
         placeholder="Your password"
       />
 
-      <button class="c-form__action-login o-button-fill-primary" type="submit">
+      <button
+        class="c-form-auth__action-login o-button o-button-full o-button-rounded o-button-fill-primary js-btn-login"
+        type="submit"
+        aria-label="login"
+      >
         LOGIN
       </button>
       <a
-        class="c-form__action-create-account o-button-fill-primary"
+        class="c-form-auth__action-create-account o-button o-button-full o-button-rounded o-button-fill-primary"
         href="{{ url_for(context['sign_up_view']) }}"
+        aria-label="create an account"
         target="_self"
       >
         Create an account
       </a>
 
-      <div class="c-form__wrapper-image">
-        <img
-          src="{{ url_for('static', filename='assets/person.png') }}"
-          alt="login image"
-          class="c-form__image"
-        />
+      <div class="c-form-auth__wrapper-image">
+        <i class="fa fa-person c-form-auth__icon" aria-hidden="true"></i>
       </div>
     </form>
   </section>

@@ -20,13 +20,16 @@
 
 {% block content %}
 
-<main class="c-main-register o-main-center-secondary">
-  <section class="c-container-wrapper-register o-container-center-screen">
-    <form method="POST" class="c-form c-form-register" action="{{ url_for(context['sign_up_route']) }}">
-      <h2 class="c-form__title">Member Register</h2>
+<main class="c-main-register o-main o-main-center o-main-secondary">
+  <section class="c-container-wrapper-register o-container-center o-container-screen">
+    <form
+      method="POST"
+      class="c-form-auth c-form-auth-register"
+    >
+      <h2 class="c-form-auth__title">Member Register</h2>
 
       <input
-        class="c-form__input"
+        class="c-form-auth__input js-input"
         type="text"
         id="username"
         name="username"
@@ -34,7 +37,7 @@
       />
 
       <input
-        class="c-form__input"
+        class="c-form-auth__input js-input"
         type="password"
         id="password"
         name="password"
@@ -42,7 +45,7 @@
       />
 
       <input
-        class="c-form__input"
+        class="c-form-auth__input js-input"
         type="email"
         id="email"
         name="email"
@@ -50,26 +53,24 @@
       />
 
       <button
-        class="c-form__action-register o-button-fill-primary"
+        class="c-form-auth__action-register o-button o-button-full o-button-rounded o-button-fill-primary js-btn-register"
         type="submit"
+        aria-label="register"
       >
         REGISTER
       </button>
 
       <a
-        class="c-form__action-have-account o-button-fill-primary"
+        class="c-form-auth__action-have-account o-button o-button-full o-button-rounded o-button-fill-primary"
         href="{{ url_for(context['login_view']) }}"
+        aria-label="do you already have an account?"
         target="_self"
       >
         Do you already have an account?
       </a>
 
-      <div class="c-form__wrapper-image">
-        <img
-          src="{{ url_for('static', filename='assets/register.png') }}"
-          alt="login image"
-          class="c-form__image"
-        />
+      <div class="c-form-auth__wrapper-image">
+        <i class="fa fa-registered c-form-auth__icon" aria-hidden="true"></i>
       </div>
     </form>
   </section>

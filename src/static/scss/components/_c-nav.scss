@@ -1,0 +1,101 @@
+.c-nav {
+  width: 100%;
+  max-height: 0;
+  overflow: auto;
+  background-color: $white-color;
+  transition: max-height 0.25s ease-in;
+
+  @include lg() {
+    height: 100%;
+    max-height: none;
+  }
+
+  &--open {
+    max-height: 10rem;
+    box-shadow: rgba($black-rgb-color, 0.2) 0rem 0.063rem 0.125rem 0rem;
+
+    @include lg() {
+      height: 100%;
+      max-height: none;
+      background-color: none;
+      box-shadow: none;
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+    gap: 0.5rem;
+    padding: 1rem;
+    list-style: none;
+
+    @include lg() {
+      align-items: center;
+      padding: 1rem;
+      margin-bottom: 0rem;
+    }
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 2rem;
+    width: 100%;
+
+    @include lg() {
+      justify-content: center;
+    }
+  }
+
+  &__link {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    width: 100%;
+    height: 100%;
+    color: $primary-color;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 1s all;
+
+    @include lg() {
+      justify-content: center;
+    }
+
+    &--active {
+      background-color: $secondary-color;
+    }
+
+    &:hover {
+      background-color: $secondary-color;
+    }
+  }
+
+  &__wrapper-icon {
+  }
+
+  &__icon {
+
+  }
+
+  &__text {
+
+
+    @include lg() {
+      display: none;
+    }
+  }
+
+  &__logout {
+    color: $error-color;
+  }
+}

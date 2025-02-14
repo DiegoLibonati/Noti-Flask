@@ -3,6 +3,7 @@ import glob
 from typing import Any
 
 from flask import Flask
+from flask_login import current_user
 
 
 def get_extra_files_paths(app: Flask) -> list[str]:
@@ -37,10 +38,14 @@ def get_context_by_key(app: Flask, key: str) -> dict[str, Any]:
     return {
         "login": {
             "sign_up_view": app.config["SIGN_UP_VIEW"],
-            "login_route": app.config["LOGIN_ROUTE"]
+            "user": current_user,
         },
         "register": {
             "login_view": app.config["LOGIN_VIEW"],
-            "sign_up_route": app.config["SIGN_UP_ROUTE"]
+            "user": current_user,
         },
+        "home": {
+            "current_route": "Home",
+            "user": current_user,
+        }
     }.get(key)

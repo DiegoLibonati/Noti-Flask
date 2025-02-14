@@ -28,4 +28,3 @@ def test_get_context_by_key(flask_app: Flask) -> None:
 
     assert context
     assert context.get("sign_up_view")
-    assert context.get("login_route")
