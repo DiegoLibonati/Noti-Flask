@@ -31,6 +31,17 @@ class NoteRepository:
             logging.info(ex)
             return False
         
+    def update_note_content_by_id(self, id_note: int, content: str) -> bool:
+        try: 
+            
+            note = self.get_note_by_id(id=id_note)
+            note.content = content
+            self.db.session.commit()
+
+            return True
+        except Exception as ex:
+            return False
+        
     def remove_note(self, note: Note) -> bool:
         try:
             self.db.session.delete(instance=note)

@@ -28,48 +28,54 @@
   {% if context["user"].notes %}
 
   <section class="c-notes">
-
     {% for note in context["user"].notes %}
-      <article class="c-note" id="note-{{ note.id }}">
-        <div class="c-note__wrapper-text">
-          <textarea
-            id="note-content"
-            class="c-note__text-area"
-            disabled
+    <article class="c-note" id="note-{{ note.id }}">
+      <div class="c-note__wrapper-text">
+        <textarea
+          id="note-content"
+          class="c-note__text-area js-text-area"
+          disabled
+        >
+{{ note.content }}</textarea
+        >
+      </div>
+
+      <div class="c-note__wrapper-bottom">
+        <h2 class="c-note__date">
+          {{ note.created_at.strftime('%d %B, %Y') }}
+        </h2>
+
+        <div class="c-note__actions">
+          <button
+            type="button"
+            aria-label="edit note"
+            class="c-note__action c-note__action-edit o-button o-button-rounded-full o-button-fill-secondary js-btn-edit-note"
           >
-            {{ note.content }}
-          </textarea>
+            <i class="fa fa-pencil c-note__icon" aria-hidden="true"></i>
+          </button>
+
+          <button
+            type="button"
+            aria-label="edit note"
+            class="c-note__action c-note__action-confirm-edit o-button o-button-rounded-full o-button-fill-secondary js-btn-confirm-edit-note"
+          >
+            <i class="fa fa-check c-note__icon" aria-hidden="true"></i>
+          </button>
+
+          <button
+            type="button"
+            aria-label="delete note"
+            class="c-note__action c-note__action-delete o-button o-button-rounded-full o-button-fill-error js-btn-delete-note"
+          >
+            <i class="fa fa-trash c-note__icon" aria-hidden="true"></i>
+          </button>
         </div>
-
-        <div class="c-note__wrapper-bottom">
-          <h2 class="c-note__date">{{ note.created_at.strftime('%d %B, %Y') }}</h2>
-
-          <div class="c-note__actions">
-            <button
-              type="button"
-              aria-label="edit note"
-              class="c-note__action c-note__action-edit o-button o-button-rounded-full o-button-fill-secondary js-btn-edit-note"
-            >
-              <i class="fa fa-pencil c-note__icon" aria-hidden="true"></i>
-            </button>
-
-            <button
-              type="button"
-              aria-label="edit note"
-              class="c-note__action c-note__action-delete o-button o-button-rounded-full o-button-fill-error js-btn-delete-note"
-            >
-              <i class="fa fa-trash c-note__icon" aria-hidden="true"></i>
-            </button>
-          </div>
-        </div>
-      </article>
+      </div>
+    </article>
     {% endfor %}
-
   </section>
 
-  {% endif %}
-
-  {% if not context["user"].notes %}
+  {% endif %} {% if not context["user"].notes %}
 
   <section class="c-notes-not-notes">
     <h2 class="c-notes-not-notes__text">No notes have been created yet!</h2>

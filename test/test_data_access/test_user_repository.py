@@ -52,6 +52,12 @@ def test_get_user_by_id(user_repository: UserRepository, mock_user: dict[str, An
     assert isinstance(user, User)
 
 
+def test_remove_user_except(user_repository: UserRepository) -> None:
+    remove = user_repository.remove_user(user="ASDASDASD")
+    
+    assert not remove
+
+
 def test_remove_user(user_repository: UserRepository, mock_user: dict[str, Any]) -> None:
     username = mock_user.get("username")
 

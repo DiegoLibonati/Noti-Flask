@@ -83,6 +83,9 @@ def setup_config(app: Flask) -> None:
 
     app.config["DELETE_NOTE_ROUTE"] = f"{NOTES_BLUEPRINT_ROUTE_NAME}.delete"
     app.config["DELETE_NOTE_ROUTE_PATH"] = f"{BLUEPRINT_NOTES_PATH}/delete"
+
+    app.config["EDIT_NOTE_ROUTE"] = f"{NOTES_BLUEPRINT_ROUTE_NAME}.edit"
+    app.config["EDIT_NOTE_ROUTE_PATH"] = f"{BLUEPRINT_NOTES_PATH}/edit"
     
     # Views
     app.config["LOGIN_VIEW"] = f"{AUTH_VIEW_ROUTE_NAME}.login"

@@ -1,11 +1,19 @@
+import {
+  classBtnConfirmEditNote,
+  classBtnEditNote,
+  classTextArea,
+} from "./constants/constants.js";
+
 import { getElements } from "./helpers/getElements.js";
 import { getIdByString } from "./helpers/getIdByString.js";
 import { getInputById } from "./helpers/getInputById.js";
+
 import { getLogout } from "./services/auth/get/getLogout.js";
 import { postLogin } from "./services/auth/post/postLogin.js";
 import { postRegister } from "./services/auth/post/postRegister.js";
 import { deleteNote } from "./services/notes/delete/deleteNote.js";
 import { postCreateNote } from "./services/notes/post/postCreateNote.js";
+import { putUpdateNote } from "./services/notes/put/putUpdateNote.js";
 
 const registerEvents = () => {
   const {
@@ -15,6 +23,7 @@ const registerEvents = () => {
     addNoteBtn,
     editNoteBtns,
     deleteNoteBtns,
+    editConfirmNoteBtns,
     loginBtn,
     logoutBtn,
     registerBtn,
@@ -50,6 +59,12 @@ const registerEvents = () => {
   if (deleteNoteBtns.length !== 0) {
     deleteNoteBtns.forEach((deleteNoteBtn) =>
       deleteNoteBtn.addEventListener("click", onClickDeleteNote)
+    );
+  }
+
+  if (editConfirmNoteBtns.length !== 0) {
+    editConfirmNoteBtns.forEach((editConfirmNoteBtn) =>
+      editConfirmNoteBtn.addEventListener("click", onClickConfirmEditNote)
     );
   }
 
@@ -113,7 +128,41 @@ const onClickAddNote = async () => {
   window.location.href = redirectTo;
 };
 
-const onClickEditNote = () => {};
+const onClickEditNote = (e) => {
+  const btn = e.currentTarget;
+  const noteRoot = btn.parentElement.parentElement.parentElement;
+
+  const textArea = noteRoot.querySelector(classTextArea);
+  const btnConfirmEdit = noteRoot.querySelector(classBtnConfirmEditNote);
+
+  textArea.removeAttribute("disabled");
+  textArea.focus();
+
+  btn.classList.add("u-none");
+  btnConfirmEdit.classList.add("u-block");
+};
+
+const onClickConfirmEditNote = async (e) => {
+  const btn = e.currentTarget;
+  const noteRoot = btn.parentElement.parentElement.parentElement;
+  const idNote = getIdByString(noteRoot.id, "-");
+
+  const textArea = noteRoot.querySelector(classTextArea);
+  const btnEdit = noteRoot.querySelector(classBtnEditNote);
+
+  textArea.setAttribute("disabled", true);
+  btn.classList.remove("u-block");
+  btnEdit.classList.remove("u-none");
+
+  const newContent = textArea.value;
+
+  const response = await putUpdateNote(idNote, newContent);
+  const data = await response.json();
+
+  const redirectTo = data.redirect_to;
+
+  window.location.href = redirectTo;
+};
 
 const onClickDeleteNote = async (e) => {
   const btn = e.currentTarget;

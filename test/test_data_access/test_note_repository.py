@@ -33,6 +33,46 @@ def test_get_note_by_id(note_repository: NoteRepository) -> None:
     assert isinstance(note, Note)
 
 
+def test_update_content_note_by_id_except(note_repository: NoteRepository) -> None:
+    new_content = "pepe"
+
+    notes = note_repository.get_notes()
+    last_note = notes[len(notes) - 1]
+    last_note_content = last_note.content
+
+    status = note_repository.update_note_content_by_id(id_note="PASDPASD", content=new_content)
+
+    assert not status
+
+    note = note_repository.get_note_by_id(id=last_note.id)
+
+    assert note.content != new_content
+    assert note.content == last_note_content
+
+
+def test_update_content_note_by_id(note_repository: NoteRepository) -> None:
+    new_content = "pepe"
+
+    notes = note_repository.get_notes()
+    last_note = notes[len(notes) - 1]
+    last_note_content = last_note.content
+
+    status = note_repository.update_note_content_by_id(id_note=last_note.id, content=new_content)
+
+    assert status
+
+    note = note_repository.get_note_by_id(id=last_note.id)
+
+    assert note.content == new_content
+    assert note.content != last_note_content
+
+
+def test_remove_note_except(note_repository: NoteRepository) -> None:
+    remove_note = note_repository.remove_note(note="ASDASD")
+    
+    assert not remove_note
+
+
 def test_remove_note(user_repository: UserRepository, note_repository: NoteRepository, mock_user: dict[str, Any]) -> None:
     username = mock_user.get("username")
 

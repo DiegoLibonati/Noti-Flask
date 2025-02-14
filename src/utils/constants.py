@@ -40,6 +40,7 @@ FLASH_ERROR = "error"
 ##### RESPONSE CODES #####
 CODE_CREATE_NOTE = "NOTE_CREATE"
 CODE_DELETE_NOTE = "NOTE_DELETE"
+CODE_EDIT_NOTE = "NOTE_EDIT"
 
 CODE_SUCCESFULLY_LOGGED_IN = "SUCCESFULLY_LOGGED_IN"
 CODE_SUCCESFULLY_LOGOUT = "SUCCESFULLY_LOGOUT"
@@ -51,10 +52,15 @@ CODE_NOT_EXISTS_NOTE = "NOT_NOTE_EXISTS"
 CODE_NOT_VALID_FIELDS = "NOT_VALID_FIELDS"
 CODE_NOT_EXISTS_USER = "NOT_USER_EXISTS"
 CODE_NOT_VALID_PASSWORD = "NOT_VALID_PASSWORD"
+CODE_NOT_VALID_ID = "NOT_VALID_ID"
+
+CODE_ERROR_DELETE_NOTE = "ERROR_UPDATE_NOTE"
+CODE_ERROR_UPDATE_NOTE = "ERROR_UPDATE_NOTE"
 
 ##### RESPONSE MESSAGES #####
 MESSAGE_CREATE_NOTE = "You created a new note successfully."
 MESSAGE_DELETE_NOTE = "You successfully deleted a note."
+MESSAGE_EDIT_NOTE = "You successfully edited a note."
 
 MESSAGE_SUCCESFULLY_LOGGED_IN = "You have successfully logged in."
 MESSAGE_SUCCESFULLY_LOGOUT = "You have successfully disconnected."
@@ -66,3 +72,7 @@ MESSAGE_NOT_EXISTS_NOTE = "The note does not exist."
 MESSAGE_NOT_VALID_FIELDS = "You must enter valid fields."
 MESSAGE_NOT_EXISTS_USER = "The user does not exist."
 MESSAGE_NOT_VALID_PASSWORD = "The password is invalid."
+MESSAGE_NOT_VALID_ID = "A valid ID is required."
+
+MESSAGE_ERROR_DELETE_NOTE = "An error occurred while editing a note."
+MESSAGE_ERROR_UPDATE_NOTE = "An error occurred while editing a note."

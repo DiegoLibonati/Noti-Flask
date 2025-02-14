@@ -1,16 +1,33 @@
+import {
+  classAlert,
+  classBtnAddNote,
+  classBtnConfirmEditNote,
+  classBtnDeleteNote,
+  classBtnEditNote,
+  classBtnLogin,
+  classBtnLogout,
+  classBtnRegister,
+  classCloseAlert,
+  classCloseNavbar,
+  classInput,
+  classNavbar,
+  classOpenNavbar,
+} from "../constants/constants.js";
+
 export const getElements = () => {
   return {
-    alerts: document.querySelectorAll(".js-alert"),
-    closeAlertBtns: document.querySelectorAll(".js-close-alert"),
-    navbar: document.querySelector(".js-navbar"),
-    openNavbarBtn: document.querySelector(".js-open-navbar"),
-    closeNavbarBtn: document.querySelector(".js-close-navbar"),
-    addNoteBtn: document.querySelector(".js-btn-add-note"),
-    editNoteBtns: document.querySelectorAll(".js-btn-edit-note"),
-    deleteNoteBtns: document.querySelectorAll(".js-btn-delete-note"),
-    loginBtn: document.querySelector(".js-btn-login"),
-    logoutBtn: document.querySelector(".js-btn-logout"),
-    registerBtn: document.querySelector(".js-btn-register"),
-    inputs: document.querySelectorAll(".js-input")
+    alerts: document.querySelectorAll(classAlert),
+    closeAlertBtns: document.querySelectorAll(classCloseAlert),
+    navbar: document.querySelector(classNavbar),
+    openNavbarBtn: document.querySelector(classOpenNavbar),
+    closeNavbarBtn: document.querySelector(classCloseNavbar),
+    addNoteBtn: document.querySelector(classBtnAddNote),
+    editNoteBtns: document.querySelectorAll(classBtnEditNote),
+    editConfirmNoteBtns: document.querySelectorAll(classBtnConfirmEditNote),
+    deleteNoteBtns: document.querySelectorAll(classBtnDeleteNote),
+    loginBtn: document.querySelector(classBtnLogin),
+    logoutBtn: document.querySelector(classBtnLogout),
+    registerBtn: document.querySelector(classBtnRegister),
+    inputs: document.querySelectorAll(classInput),
   };
 };

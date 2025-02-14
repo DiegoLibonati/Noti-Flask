@@ -13,7 +13,14 @@ notes_route = Blueprint("notes_route", __name__)
 def create() -> Response:
     return notes_controller.create()
 
+
 @notes_route.route("/delete/<id>", methods = ["DELETE"])
 @login_required
 def delete(id: str) -> Response:
     return notes_controller.delete(id=id)
+
+
+@notes_route.route("/edit/<id>", methods = ["PUT"])
+@login_required
+def edit(id: str) -> Response:
+    return notes_controller.edit(id=id)

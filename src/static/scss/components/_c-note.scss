@@ -48,6 +48,10 @@
     &-edit {
       color: $black-color;
     }
+
+    &-confirm-edit {
+      display: none;
+    }
   }
 
   &__icon {
