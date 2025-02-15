@@ -48,7 +48,7 @@ pytest-env
 
 # Video 
 
-Coming soon...
+https://github.com/user-attachments/assets/069dc4e6-fb4c-4ae2-a2aa-629125ed4921
 
 ## Testing
 
