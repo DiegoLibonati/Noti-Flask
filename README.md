@@ -50,8 +50,17 @@ pytest-env
 
 https://github.com/user-attachments/assets/069dc4e6-fb4c-4ae2-a2aa-629125ed4921
 
-## Testing
+## Testing Backend
 
 1. Join to the correct path of the clone
 2. Execute in Windows: `venv\Scripts\activate`
 3. Execute: `pytest --log-cli-level=INFO`
+
+## Testing Frontend
+
+1. Join to the correct path of the clone
+2. Enter to `src/static/js` directory
+3. Execute `yarn install` or `npm install` to install depedencies
+4. Execute `yarn test` or `npm test`
+
+NOTE: If you have already installed the node modules, just execute point 2 and 4.
