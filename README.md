@@ -21,7 +21,27 @@ This is a Web Application made with Flask. This application allows you to create
 3. SCSS
 4. Javascript
 
-#### Requirements.txt
+## Libraries used
+
+#### Dependencies JS
+
+```
+No dependecies in package.json
+```
+
+#### devDependencies JS
+
+```
+"@babel/preset-env": "^7.26.9"
+"@testing-library/dom": "^10.4.0"
+"@testing-library/jest-dom": "^6.6.3"
+"@testing-library/user-event": "^14.5.2"
+"babel-jest": "^29.7.0"
+"jest": "^29.7.0"
+"jest-environment-jsdom": "^29.7.0"
+```
+
+#### Flask Requirements.txt
 
 ```
 Flask==3.1.0
@@ -35,7 +55,7 @@ Flask-Scss==0.5
 gunicorn==23.0.0
 ```
 
-#### Requirements.test.txt
+#### Flask Requirements.test.txt
 
 ```
 pytest
@@ -56,7 +76,7 @@ https://github.com/user-attachments/assets/069dc4e6-fb4c-4ae2-a2aa-629125ed4921
 2. Execute in Windows: `venv\Scripts\activate`
 3. Execute: `pytest --log-cli-level=INFO`
 
-## Testing Frontend
+## Testing JS Files
 
 1. Join to the correct path of the clone
 2. Enter to `src/static/js` directory
