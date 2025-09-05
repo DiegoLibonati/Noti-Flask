@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/dom";
 
-import { BODY_HOME } from "./tests/jest.constants.js";
+import { BODY_HOME } from "../tests/jest.constants.js";
 
 describe("Home Page", () => {
   describe("General Tests.", () => {

@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/dom";
 
 import { getInputById } from "./helpers/getInputById.js";
 
-import { BODY_LOGIN } from "./tests/jest.constants.js";
+import { BODY_LOGIN } from "../tests/jest.constants.js";
 
 describe("Login Page", () => {
   describe("General Tests.", () => {

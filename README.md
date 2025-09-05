@@ -33,10 +33,10 @@ No dependecies in package.json
 
 ```
 "@babel/preset-env": "^7.26.9"
+"babel-jest": "^29.7.0"
 "@testing-library/dom": "^10.4.0"
 "@testing-library/jest-dom": "^6.6.3"
 "@testing-library/user-event": "^14.5.2"
-"babel-jest": "^29.7.0"
 "jest": "^29.7.0"
 "jest-environment-jsdom": "^29.7.0"
 ```

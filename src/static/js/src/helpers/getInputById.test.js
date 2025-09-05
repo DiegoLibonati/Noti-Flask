@@ -1,6 +1,6 @@
 import { getInputById } from "./getInputById.js";
 
-import { BODY_ELEMENTS } from "../tests/jest.constants.js";
+import { BODY_ELEMENTS } from "../../tests/jest.constants.js";
 
 describe("getInputById.js", () => {
   describe("General Tests.", () => {

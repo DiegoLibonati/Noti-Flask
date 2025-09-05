@@ -1,6 +1,6 @@
 import { getElements } from "./getElements.js";
 
-import { BODY_ELEMENTS } from "../tests/jest.constants.js";
+import { BODY_ELEMENTS } from "../../tests/jest.constants.js";
 
 describe("getElements.js", () => {
   describe("General Tests.", () => {
