@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  noti-flask:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: noti-flask
+    restart: always
+    env_file:
+      - ./.env
+    depends_on:
+      - noti-db
+    expose:
+      - "5000"
+    networks:
+      - noti-net
+    command: >
+      bash -c "
+      echo 'Waiting for MySQL...' &&
+      sleep 10 &&
+      echo 'Running migrations...' &&
+      flask db upgrade || echo 'Migration skipped or failed' &&
+      echo 'Starting Gunicorn...' &&
+      gunicorn -c config/gunicorn_config.py wsgi:app
+      "
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  noti-db:
+    image: mysql:8.0
+    container_name: noti-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - noti-db-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    expose:
+      - "3306"
+    networks:
+      - noti-net
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u${MYSQL_USER} -p${MYSQL_PASSWORD} || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: noti-nginx
+    restart: always
+    ports:
+      - "8443:8443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./src/static:/home/app/static
+    depends_on:
+      - noti-flask
+    networks:
+      - noti-net
+
+volumes:
+  noti-db-data:
+
+networks:
+  noti-net:
+    driver: bridge

@@ -1,157 +1,99 @@
-import logging
+from flask import Response, current_app, flash, jsonify, redirect, request, url_for
+from flask_login import login_required, login_user, logout_user
 
-from flask import Response
-from flask import request
-from flask import current_app
-from flask import flash
-from flask import make_response
-from flask_login import login_user
-from flask_login import logout_user
-from werkzeug.security import check_password_hash
+from config.logger_config import setup_logger
+from src.constants.codes import FLASH_ERROR, FLASH_SUCCESS
+from src.constants.messages import (
+    MESSAGE_ALREADY_USER_EXISTS,
+    MESSAGE_NOT_EXISTS_USER,
+    MESSAGE_NOT_VALID_FIELDS,
+    MESSAGE_NOT_VALID_PASSWORD,
+    MESSAGE_SUCCESFULLY_LOGGED_IN,
+    MESSAGE_SUCCESFULLY_LOGOUT,
+    MESSAGE_SUCCESFULLY_SIGN_UP,
+)
+from src.models.orm.user import User
+from src.services.encrypt_service import EncryptService
+from src.services.user_service import UserService
+from src.utils.error_handler import handle_exceptions
 
-from src.data_access.user_repository import UserRepository
-from src.utils.constants import FLASH_SUCCESS
-from src.utils.constants import FLASH_ERROR
-from src.utils.constants import CODE_SUCCESFULLY_LOGGED_IN
-from src.utils.constants import CODE_SUCCESFULLY_LOGOUT
-from src.utils.constants import CODE_SUCCESFULLY_SIGN_UP
-from src.utils.constants import CODE_ALREADY_USER_EXISTS
-from src.utils.constants import CODE_NOT_VALID_FIELDS
-from src.utils.constants import CODE_NOT_EXISTS_USER
-from src.utils.constants import CODE_NOT_VALID_PASSWORD
-from src.utils.constants import MESSAGE_SUCCESFULLY_LOGGED_IN
-from src.utils.constants import MESSAGE_SUCCESFULLY_LOGOUT
-from src.utils.constants import MESSAGE_SUCCESFULLY_SIGN_UP
-from src.utils.constants import MESSAGE_ALREADY_USER_EXISTS
-from src.utils.constants import MESSAGE_NOT_VALID_FIELDS
-from src.utils.constants import MESSAGE_NOT_EXISTS_USER
-from src.utils.constants import MESSAGE_NOT_VALID_PASSWORD
+logger = setup_logger()
 
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+@handle_exceptions
+def alive() -> Response:
+    response = {
+        "message": "I am Alive!",
+        "version_bp": "2.0.0",
+        "author": "Diego Libonati",
+        "name_bp": "Auth",
+    }
+
+    return jsonify(response), 200
 
 
+@handle_exceptions
 def login() -> Response:
-    form = request.get_json()
+    body = request.form
 
-    user_repository = UserRepository()
-
-    username = form.get("username", "").strip()
-    password = form.get("password", "").strip()
+    username = body.get("username", "").strip()
+    password = body.get("password", "").strip()
 
     if not username or not password:
         flash(MESSAGE_NOT_VALID_FIELDS, FLASH_ERROR)
+        return redirect(url_for(current_app.config["LOGIN_VIEW"]))
 
-        response = {
-            "message": MESSAGE_NOT_VALID_FIELDS,
-            "code": CODE_NOT_VALID_FIELDS,
-            "redirect_to": current_app.config["LOGIN_VIEW_PATH"]
-        }
-        status_code = 400
-        
-        return make_response(response, status_code)
+    user = UserService.get_user_by_username(username=username)
 
-    user_exists = user_repository.get_user_by_username(username=username)
-
-    if not user_exists:
+    if not user:
         flash(MESSAGE_NOT_EXISTS_USER, FLASH_ERROR)
+        return redirect(url_for(current_app.config["LOGIN_VIEW"]))
 
-        response = {
-            "message": MESSAGE_NOT_EXISTS_USER,
-            "code": CODE_NOT_EXISTS_USER,
-            "redirect_to": current_app.config["LOGIN_VIEW_PATH"]
-        }
-        status_code = 404
-        
-        return make_response(response, status_code)
-    
-    if not check_password_hash(user_exists.password, password):
+    if not EncryptService(password).valid_password(user.password):
         flash(MESSAGE_NOT_VALID_PASSWORD, FLASH_ERROR)
+        return redirect(url_for(current_app.config["LOGIN_VIEW"]))
 
-        response = {
-            "message": MESSAGE_NOT_VALID_PASSWORD,
-            "code": CODE_NOT_VALID_PASSWORD,
-            "redirect_to": current_app.config["LOGIN_VIEW_PATH"]
-        }
-        status_code = 400
-        
-        return make_response(response, status_code)
-
-    user = user_exists
-    
     login_user(user=user, remember=True)
 
-    flash("You have successfully logged in.", FLASH_SUCCESS)
-    
-    response = {
-        "message": MESSAGE_SUCCESFULLY_LOGGED_IN,
-        "code": CODE_SUCCESFULLY_LOGGED_IN,
-        "redirect_to": current_app.config["HOME_VIEW_PATH"]
-    }
-    status_code = 200
-    
-    return make_response(response, status_code)
+    flash(MESSAGE_SUCCESFULLY_LOGGED_IN, FLASH_SUCCESS)
+    return redirect(url_for(current_app.config["HOME_VIEW"]))
 
 
+@login_required
+@handle_exceptions
 def logout() -> Response:
     logout_user()
 
     flash(MESSAGE_SUCCESFULLY_LOGOUT, FLASH_SUCCESS)
-
-    response = {
-        "message": MESSAGE_SUCCESFULLY_LOGOUT,
-        "code": CODE_SUCCESFULLY_LOGOUT,
-        "redirect_to": current_app.config["LOGIN_VIEW_PATH"]
-    }
-    status_code = 200
-    
-    return make_response(response, status_code)
+    return redirect(url_for(current_app.config["LOGIN_VIEW"]))
 
 
+@handle_exceptions
 def sign_up() -> Response:
-    form = request.get_json()
-    user_repository = UserRepository()
+    body = request.form
 
-    username = form.get("username", "").strip()
-    password = form.get("password", "").strip()
-    email = form.get("email", "").strip()
-    
+    username = body.get("username", "").strip()
+    password = body.get("password", "").strip()
+    email = body.get("email", "").strip()
+
     if not username or not password or not email:
         flash(MESSAGE_NOT_VALID_FIELDS, FLASH_ERROR)
+        return redirect(url_for(current_app.config["SIGN_UP_VIEW"]))
 
-        response = {
-            "message": MESSAGE_NOT_VALID_FIELDS,
-            "code": CODE_NOT_VALID_FIELDS,
-            "redirect_to": current_app.config["SIGN_UP_VIEW_PATH"]
-        }
-        status_code = 400
-        
-        return make_response(response, status_code)
-    
-    username_exists = user_repository.get_user_by_username(username=username)
-    email_exists = user_repository.get_user_by_email(email=email)
+    username_exists = UserService.get_user_by_username(username=username)
+    email_exists = UserService.get_user_by_email(email=email)
 
     if email_exists or username_exists:
         flash(MESSAGE_ALREADY_USER_EXISTS, FLASH_ERROR)
+        return redirect(url_for(current_app.config["SIGN_UP_VIEW"]))
 
-        response = {
-            "message": MESSAGE_ALREADY_USER_EXISTS,
-            "code": CODE_ALREADY_USER_EXISTS,
-            "redirect_to": current_app.config["SIGN_UP_VIEW_PATH"]
-        }
-        status_code = 400
-        
-        return make_response(response, status_code)
-    
-    user_repository.add_user(username=username, email=email, password=password)
+    UserService.add_user(
+        User(
+            username=username,
+            password=EncryptService(password).password_hashed,
+            email=email,
+        )
+    )
 
     flash(MESSAGE_SUCCESFULLY_SIGN_UP, FLASH_SUCCESS)
-
-    response = {
-        "message": MESSAGE_SUCCESFULLY_SIGN_UP,
-        "code": CODE_SUCCESFULLY_SIGN_UP,
-        "redirect_to": current_app.config["LOGIN_VIEW_PATH"]
-    }
-    status_code = 201
-    
-    return make_response(response, status_code)
+    return redirect(url_for(current_app.config["LOGIN_VIEW"]))

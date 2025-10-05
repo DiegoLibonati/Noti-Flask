@@ -1,2 +1,2 @@
-pytest
-pytest-env
+pytest==8.4.2
+pytest-env==1.1.5

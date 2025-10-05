@@ -1,14 +1,18 @@
-# CONFIG TEST
+import os
+
+from src.constants.vars import (
+    BLUEPRINT_AUTH_PATH,
+    BLUEPRINT_NOTES_PATH,
+    VIEW_APP_PATH,
+    VIEW_AUTH_PATH,
+)
+
 BLUEPRINTS = {
-    "auth": "/v1/api/auth",
-    "notes": "/v1/api/notes",
-    "app_views": "/v1/views/app",
-    "auth_views": "/v1/views/auth"
+    "auth": BLUEPRINT_AUTH_PATH,
+    "notes": BLUEPRINT_NOTES_PATH,
 }
 
-# MOCKS
-MOCK_USER = {
-    "username": "user_test",
-    "password": "1234",
-    "email": "user_test@gmail.com"
-}
+VIEWS = {"app_views": VIEW_APP_PATH, "auth_views": VIEW_AUTH_PATH}
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+COMPOSE_FILE = os.path.join(PROJECT_ROOT, "dev.docker-compose.yml")

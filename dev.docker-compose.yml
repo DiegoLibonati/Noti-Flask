@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  noti-flask:
+    build:
+      context: .
+      dockerfile: Dockerfile.development
+    restart: always
+    env_file:
+      - ./.env
+    ports:
+      - "5000:5000"
+    depends_on:
+      - noti-db
+    volumes:
+      - .:/home/app           
+      - /home/app/venv                  
+    networks:
+      - noti-net
+
+  noti-db:
+    image: mysql:8.0
+    container_name: noti-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - noti-db-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    networks:
+      - noti-net
+
+  adminer:
+    image: adminer
+    container_name: noti-adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - noti-net
+
+volumes:
+  noti-db-data:
+
+networks:
+  noti-net:
+    driver: bridge

@@ -1,0 +1,27 @@
+FROM python:3.11
+
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /home/app
+
+ENV PYTHONPATH="/home/app"
+ENV FLASK_ENV=development
+ENV FLASK_DEBUG=1
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+WORKDIR /home/app/src/static/ts
+COPY src/static/ts/package*.json ./
+RUN npm install
+
+WORKDIR /home/app
+COPY . .
+
+ENV SHELL=/bin/bash
+
+CMD ["bash", "-c", "cd src/static/ts && node scripts/watch-all.js & python app.py"]
