@@ -27,22 +27,22 @@ describe("Register Page", () => {
     });
 
     test("It must render the register form with the register elements.", () => {
-      const form = document.querySelector(".qa-form-register") as HTMLFormElement;
+      const form = document.querySelector<HTMLFormElement>(".qa-form-register");
 
-      const formHeading = within(form).getByRole("heading", {
+      const formHeading = within(form!).getByRole("heading", {
         name: /member register/i,
       });
       const formInputs = document.querySelectorAll(".qa-input");
       const formInputUsername = getInputById("username");
       const formInputPassword = getInputById("password");
       const formInputEmail = getInputById("email");
-      const formRegisterBtn = within(form).getByRole("button", {
+      const formRegisterBtn = within(form!).getByRole("button", {
         name: /register/i,
       });
-      const formDoYouAlreadyHaveAnAccount = within(form).getByRole("link", {
+      const formDoYouAlreadyHaveAnAccount = within(form!).getByRole("link", {
         name: /do you already have an account?/i,
       });
-      const formLogo = document.querySelector(".qa-form-icon");
+      const formLogo = document.querySelector<HTMLElement>(".qa-form-icon");
 
       expect(form).toBeInTheDocument();
       expect(form).toHaveClass("c-form-auth c-form-auth-register");

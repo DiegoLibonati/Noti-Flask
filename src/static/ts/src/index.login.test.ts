@@ -27,19 +27,21 @@ describe("Login Page", () => {
     });
 
     test("It must render the login form with the login elements.", () => {
-      const form = document.querySelector(".qa-form-login") as HTMLFormElement;
+      const form = document.querySelector<HTMLFormElement>(".qa-form-login");
 
-      const formHeading = within(form).getByRole("heading", {
+      const formHeading = within(form!).getByRole("heading", {
         name: /member login/i,
       });
       const formInputs = document.querySelectorAll(".qa-input");
       const formInputUsername = getInputById("username");
       const formInputPassword = getInputById("password");
-      const formLoginBtn = within(form).getByRole("button", { name: /login/i });
-      const formCreateAnAccount = within(form).getByRole("link", {
+      const formLoginBtn = within(form!).getByRole("button", {
+        name: /login/i,
+      });
+      const formCreateAnAccount = within(form!).getByRole("link", {
         name: /create an account/i,
       });
-      const formLogo = document.querySelector(".qa-form-icon");
+      const formLogo = document.querySelector<HTMLElement>(".qa-form-icon");
 
       expect(form).toBeInTheDocument();
       expect(form).toHaveClass("c-form-auth c-form-auth-login");
