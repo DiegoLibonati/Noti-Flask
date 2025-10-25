@@ -1,35 +1,44 @@
-import {
-  classBtnConfirmEditNote,
-  classBtnEditNote,
-  classTextArea,
-} from "@src/constants/constants";
-
-import { getElements } from "@src/helpers/getElements";
 import { getIdByString } from "@src/helpers/getIdByString";
 
-import { deleteNote } from "@src/services/notes/delete/deleteNote";
-import { patchUpdateNote } from "@src/services/notes/patch/patchUpdateNote";
-import { postCreateNote } from "@src/services/notes/post/postCreateNote";
+import { postCreateNote } from "@src/api/post/postCreateNote";
+import { patchUpdateNote } from "@src/api/patch/patchUpdateNote";
+import { deleteNote } from "@src/api/delete/deleteNote";
+
+import {
+  classAlert,
+  classBtnAddNote,
+  classBtnConfirmEditNote,
+  classBtnDeleteNote,
+  classBtnEditNote,
+  classCloseAlert,
+  classCloseNavbar,
+  classNavbar,
+  classOpenNavbar,
+  classTextArea,
+} from "@src/constants/vars";
 
 const registerEvents = () => {
-  const {
-    closeAlertBtns,
-    openNavbarBtn,
-    closeNavbarBtn,
-    addNoteBtn,
-    deleteNoteBtns,
-    editNoteBtns,
-    editConfirmNoteBtns,
-  } = getElements();
+  const closeNavbarBtn =
+    document.querySelector<HTMLButtonElement>(classCloseNavbar);
+  const closeAlertBtns =
+    document.querySelectorAll<HTMLButtonElement>(classCloseAlert);
+  const openNavbarBtn =
+    document.querySelector<HTMLButtonElement>(classOpenNavbar);
+  const addNoteBtn = document.querySelector<HTMLButtonElement>(classBtnAddNote);
+  const editNoteBtns =
+    document.querySelectorAll<HTMLButtonElement>(classBtnEditNote);
+  const deleteNoteBtns =
+    document.querySelectorAll<HTMLButtonElement>(classBtnDeleteNote);
+  const editConfirmNoteBtns = document.querySelectorAll<HTMLButtonElement>(
+    classBtnConfirmEditNote
+  );
 
-  // Close Alert Btns Events
   if (closeAlertBtns.length !== 0) {
     closeAlertBtns.forEach((closeAlertBtn) =>
       closeAlertBtn.addEventListener("click", onClickCloseAlert)
     );
   }
 
-  // Manage Navbar Btns Events
   if (openNavbarBtn) {
     openNavbarBtn.addEventListener("click", onClickOpenNavbar);
   }
@@ -38,7 +47,6 @@ const registerEvents = () => {
     closeNavbarBtn.addEventListener("click", onClickCloseNavbar);
   }
 
-  // Btns Note Events
   if (addNoteBtn) {
     addNoteBtn.addEventListener("click", onClickAddNote);
   }
@@ -67,7 +75,7 @@ const onClickCloseAlert = (e: Event) => {
   const idBtn = btn.id;
   const idAlertClicked = getIdByString(idBtn, "-");
 
-  const { alerts } = getElements();
+  const alerts = document.querySelectorAll<HTMLLIElement>(classAlert);
 
   const alertClicked = Array.from(alerts).find(
     (alert) => getIdByString(alert.id, "-") === idAlertClicked
@@ -79,7 +87,9 @@ const onClickCloseAlert = (e: Event) => {
 const onClickOpenNavbar = (e: Event) => {
   const btn = e.currentTarget as HTMLButtonElement;
 
-  const { navbar, closeNavbarBtn } = getElements();
+  const navbar = document.querySelector<HTMLElement>(classNavbar);
+  const closeNavbarBtn =
+    document.querySelector<HTMLButtonElement>(classCloseNavbar);
 
   btn.classList.remove("c-header__action--active");
   closeNavbarBtn!.classList.add("c-header__action--active");
@@ -89,7 +99,9 @@ const onClickOpenNavbar = (e: Event) => {
 const onClickCloseNavbar = (e: Event) => {
   const btn = e.currentTarget as HTMLButtonElement;
 
-  const { navbar, openNavbarBtn } = getElements();
+  const navbar = document.querySelector<HTMLElement>(classNavbar);
+  const openNavbarBtn =
+    document.querySelector<HTMLButtonElement>(classOpenNavbar);
 
   btn.classList.remove("c-header__action--active");
   openNavbarBtn!.classList.add("c-header__action--active");
@@ -99,29 +111,25 @@ const onClickCloseNavbar = (e: Event) => {
 const onClickAddNote = async () => {
   const response = await postCreateNote();
 
-  if (response.redirected) {
-    window.location.href = response.url;
-  }
+  if (response.redirected) window.location.href = response.url;
 
-  return response;
+  return;
 };
 
 const onClickEditNote = (e: Event) => {
   const btn = e.currentTarget as HTMLButtonElement;
   const noteRoot = btn.parentElement?.parentElement?.parentElement;
 
-  const textArea = noteRoot?.querySelector(
-    classTextArea
-  ) as HTMLTextAreaElement;
-  const btnConfirmEdit = noteRoot?.querySelector(
+  const textArea = noteRoot?.querySelector<HTMLTextAreaElement>(classTextArea);
+  const btnConfirmEdit = noteRoot?.querySelector<HTMLButtonElement>(
     classBtnConfirmEditNote
-  ) as HTMLButtonElement;
+  );
 
   textArea?.removeAttribute("disabled");
   textArea?.focus();
 
   btn.classList.add("u-none");
-  btnConfirmEdit.classList.add("u-block");
+  btnConfirmEdit!.classList.add("u-block");
 };
 
 const onClickConfirmEditNote = async (e: Event) => {
@@ -130,19 +138,18 @@ const onClickConfirmEditNote = async (e: Event) => {
     ?.parentElement as HTMLDivElement;
   const idNote = getIdByString(noteRoot.id, "-");
 
-  const textArea = noteRoot.querySelector(classTextArea) as HTMLTextAreaElement;
-  const btnEdit = noteRoot.querySelector(classBtnEditNote) as HTMLButtonElement;
+  const textArea = noteRoot.querySelector<HTMLTextAreaElement>(classTextArea);
+  const btnEdit = noteRoot.querySelector<HTMLButtonElement>(classBtnEditNote);
 
   textArea?.setAttribute("disabled", "true");
   btn.classList.remove("u-block");
-  btnEdit.classList.remove("u-none");
+  btnEdit!.classList.remove("u-none");
 
-  const newContent = textArea.value;
+  const newContent = textArea!.value;
 
   const response = await patchUpdateNote(idNote, newContent);
-  const data = response.json() as unknown as Record<string, unknown>;
 
-  const redirectTo = data.redirect_to as string;
+  const redirectTo = response.redirect_to;
 
   window.location.href = redirectTo;
 };
@@ -154,9 +161,8 @@ const onClickDeleteNote = async (e: Event) => {
   const idNote = getIdByString(noteRoot.id, "-");
 
   const response = await deleteNote(idNote);
-  const data = response.json() as unknown as Record<string, unknown>;
 
-  const redirectTo = data.redirect_to as string;
+  const redirectTo = response.redirect_to;
 
   window.location.href = redirectTo;
 };

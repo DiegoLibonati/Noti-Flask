@@ -1,7 +1,7 @@
-import { getElements } from "@src/helpers/getElements";
+import { classInput } from "@src/constants/vars";
 
 export const getInputById = (id: string): Element | undefined => {
-  const { inputs } = getElements();
+  const inputs = document.querySelectorAll<HTMLInputElement>(classInput);
 
   return Array.from(inputs).find((input) => input.id === id);
 };

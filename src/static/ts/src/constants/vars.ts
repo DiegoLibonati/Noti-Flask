@@ -1,8 +1,3 @@
-// ***** Services *****
-export const apiVersionNotes = "v1";
-
-export const apiPrefixNotes = `/api/${apiVersionNotes}/notes`;
-
 // ***** Classes JS *****
 export const classTextArea = ".js-text-area";
 

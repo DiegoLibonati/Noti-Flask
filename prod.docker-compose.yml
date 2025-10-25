@@ -59,7 +59,7 @@ services:
     container_name: noti-nginx
     restart: always
     ports:
-      - "8443:8443"
+      - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./src/static:/home/app/static

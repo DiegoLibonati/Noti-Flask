@@ -1,5 +1,3 @@
-export const apiVersionNotes = "v1";
-export const apiPrefixNotes = `/api/${apiVersionNotes}/notes`;
 export const classTextArea = ".js-text-area";
 export const classBtnConfirmEditNote = ".js-btn-confirm-edit-note";
 export const classBtnAddNote = ".js-btn-add-note";

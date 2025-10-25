@@ -1,11 +1,16 @@
-import { classBtnConfirmEditNote, classBtnEditNote, classTextArea, } from "./constants/constants.js";
-import { getElements } from "./helpers/getElements.js";
 import { getIdByString } from "./helpers/getIdByString.js";
-import { deleteNote } from "./services/notes/delete/deleteNote.js";
-import { patchUpdateNote } from "./services/notes/patch/patchUpdateNote.js";
-import { postCreateNote } from "./services/notes/post/postCreateNote.js";
+import { postCreateNote } from "./api/post/postCreateNote.js";
+import { patchUpdateNote } from "./api/patch/patchUpdateNote.js";
+import { deleteNote } from "./api/delete/deleteNote.js";
+import { classAlert, classBtnAddNote, classBtnConfirmEditNote, classBtnDeleteNote, classBtnEditNote, classCloseAlert, classCloseNavbar, classNavbar, classOpenNavbar, classTextArea, } from "./constants/vars.js";
 const registerEvents = () => {
-    const { closeAlertBtns, openNavbarBtn, closeNavbarBtn, addNoteBtn, deleteNoteBtns, editNoteBtns, editConfirmNoteBtns, } = getElements();
+    const closeNavbarBtn = document.querySelector(classCloseNavbar);
+    const closeAlertBtns = document.querySelectorAll(classCloseAlert);
+    const openNavbarBtn = document.querySelector(classOpenNavbar);
+    const addNoteBtn = document.querySelector(classBtnAddNote);
+    const editNoteBtns = document.querySelectorAll(classBtnEditNote);
+    const deleteNoteBtns = document.querySelectorAll(classBtnDeleteNote);
+    const editConfirmNoteBtns = document.querySelectorAll(classBtnConfirmEditNote);
     if (closeAlertBtns.length !== 0) {
         closeAlertBtns.forEach((closeAlertBtn) => closeAlertBtn.addEventListener("click", onClickCloseAlert));
     }
@@ -32,30 +37,31 @@ const onClickCloseAlert = (e) => {
     const btn = e.currentTarget;
     const idBtn = btn.id;
     const idAlertClicked = getIdByString(idBtn, "-");
-    const { alerts } = getElements();
+    const alerts = document.querySelectorAll(classAlert);
     const alertClicked = Array.from(alerts).find((alert) => getIdByString(alert.id, "-") === idAlertClicked);
     alertClicked.remove();
 };
 const onClickOpenNavbar = (e) => {
     const btn = e.currentTarget;
-    const { navbar, closeNavbarBtn } = getElements();
+    const navbar = document.querySelector(classNavbar);
+    const closeNavbarBtn = document.querySelector(classCloseNavbar);
     btn.classList.remove("c-header__action--active");
     closeNavbarBtn.classList.add("c-header__action--active");
     navbar.classList.add("c-nav--open");
 };
 const onClickCloseNavbar = (e) => {
     const btn = e.currentTarget;
-    const { navbar, openNavbarBtn } = getElements();
+    const navbar = document.querySelector(classNavbar);
+    const openNavbarBtn = document.querySelector(classOpenNavbar);
     btn.classList.remove("c-header__action--active");
     openNavbarBtn.classList.add("c-header__action--active");
     navbar.classList.remove("c-nav--open");
 };
 const onClickAddNote = async () => {
     const response = await postCreateNote();
-    if (response.redirected) {
+    if (response.redirected)
         window.location.href = response.url;
-    }
-    return response;
+    return;
 };
 const onClickEditNote = (e) => {
     const btn = e.currentTarget;
@@ -79,8 +85,7 @@ const onClickConfirmEditNote = async (e) => {
     btnEdit.classList.remove("u-none");
     const newContent = textArea.value;
     const response = await patchUpdateNote(idNote, newContent);
-    const data = response.json();
-    const redirectTo = data.redirect_to;
+    const redirectTo = response.redirect_to;
     window.location.href = redirectTo;
 };
 const onClickDeleteNote = async (e) => {
@@ -89,8 +94,7 @@ const onClickDeleteNote = async (e) => {
         ?.parentElement;
     const idNote = getIdByString(noteRoot.id, "-");
     const response = await deleteNote(idNote);
-    const data = response.json();
-    const redirectTo = data.redirect_to;
+    const redirectTo = response.redirect_to;
     window.location.href = redirectTo;
 };
 const onInit = () => {
