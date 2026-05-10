@@ -1,13 +1,15 @@
 from typing import Any
 
-from src.constants.codes import CODE_ERROR_API
-from src.constants.messages import MESSAGE_ERROR_API
+from flask import Response, jsonify
+
+from src.constants.codes import CODE_ERROR_INTERNAL_SERVER
+from src.constants.messages import MESSAGE_ERROR_INTERNAL_SERVER
 
 
 class BaseAPIError(Exception):
     status_code: int = 500
-    message: str = MESSAGE_ERROR_API
-    code: str = CODE_ERROR_API
+    message: str = MESSAGE_ERROR_INTERNAL_SERVER
+    code: str = CODE_ERROR_INTERNAL_SERVER
 
     def __init__(
         self,
@@ -27,12 +29,18 @@ class BaseAPIError(Exception):
         self.payload = payload or {}
 
     def to_dict(self) -> dict[str, Any]:
-        response = {
+        response: dict[str, Any] = {
             "code": self.code,
             "message": self.message,
-            "payload": dict(self.payload),
         }
+
+        if self.payload:
+            response["payload"] = dict(self.payload)
+
         return response
+
+    def flask_response(self) -> Response:
+        return jsonify(self.to_dict()), self.status_code
 
 
 class ValidationAPIError(BaseAPIError):
@@ -53,3 +61,13 @@ class NotFoundAPIError(BaseAPIError):
 class ConflictAPIError(BaseAPIError):
     status_code = 409
     message = "Conflict error"
+
+
+class BusinessAPIError(BaseAPIError):
+    status_code = 422
+    message = "Business rule violated"
+
+
+class InternalAPIError(BaseAPIError):
+    status_code = 500
+    message = "Internal error"

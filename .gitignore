@@ -4,10 +4,14 @@ __pycache__
 .pytest_cache/
 .ruff_cache
 node_modules
+src/static/js
+src/static/css
+src/static/ts/coverage
 
-package-lock.json
-yarn.lock
-noti.db
 .env
 *.pyc
 *.pyo
+package-lock.json
+yarn.lock
+.coverage
+

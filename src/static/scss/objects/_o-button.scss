@@ -1,3 +1,5 @@
+@use "../settings/settings" as *;
+
 .o-button {
   cursor: pointer;
   transition: 1s all;

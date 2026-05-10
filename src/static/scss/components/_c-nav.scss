@@ -1,3 +1,6 @@
+@use "../settings/settings" as *;
+@use "../tools/mixins" as *;
+
 .c-nav {
   width: 100%;
   max-height: 0;

@@ -2,7 +2,6 @@ import glob
 from typing import Any
 
 from flask import Flask
-from flask_login import current_user
 
 from src.constants.paths import (
     APP_FILES_PATH,
@@ -18,8 +17,8 @@ from src.constants.paths import (
 )
 
 
-def get_extra_files_paths() -> list[str]:
-    extra_files_paths = [
+def get_watch_patterns() -> list[str]:
+    return [
         SCCS_FILES_PATH,
         SCCS_FILES_PATH_2,
         GENERAL_FILES_PATH,
@@ -32,34 +31,28 @@ def get_extra_files_paths() -> list[str]:
         JS_FILES_PATH_2,
     ]
 
-    return extra_files_paths
-
 
 def get_extra_files() -> list[str]:
     extra_files = []
-    extra_files_paths = get_extra_files_paths()
-
-    for extra_files_path in extra_files_paths:
-        extra_files.extend(glob.glob(extra_files_path, recursive=True))
-
+    for pattern in get_watch_patterns():
+        extra_files.extend(glob.glob(pattern, recursive=True))
     return extra_files
 
 
-def get_context_by_key(app: Flask, key: str) -> dict[str, Any]:
-    return {
+def get_context_by_key(app: Flask, key: str, **extra: Any) -> dict[str, Any]:
+    base: dict[str, Any] = {
         "login": {
             "sign_up_view": app.config["SIGN_UP_VIEW"],
             "login_route": app.config["LOGIN_ROUTE"],
-            "user": current_user,
         },
         "register": {
             "login_view": app.config["LOGIN_VIEW"],
             "sign_up_route": app.config["SIGN_UP_ROUTE"],
-            "user": current_user,
         },
         "home": {
             "current_route": "Home",
             "logout_route": app.config["LOGOUT_ROUTE"],
-            "user": current_user,
         },
-    }.get(key)
+    }.get(key, {})
+
+    return {**base, **extra}

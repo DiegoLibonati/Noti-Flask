@@ -1,3 +1,6 @@
+@use "../settings/settings" as *;
+@use "../tools/mixins" as *;
+
 .c-header {
   position: fixed;
   width: 100%;

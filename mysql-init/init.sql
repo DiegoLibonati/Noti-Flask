@@ -1,6 +1,0 @@
-CREATE DATABASE IF NOT EXISTS notidb;
-
-CREATE USER IF NOT EXISTS 'notiuser'@'%' IDENTIFIED BY 'notipassword';
-GRANT ALL PRIVILEGES ON notidb.* TO 'notiuser'@'%';
-
-FLUSH PRIVILEGES;

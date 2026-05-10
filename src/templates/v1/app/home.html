@@ -22,13 +22,13 @@
 
 <main class="o-main o-main-app">
   <section class="c-title">
-    <h1 class="c-title__text">{{ context["user"].username }} Notes</h1>
+    <h1 class="c-title__text">{{ current_user.username }} Notes</h1>
   </section>
 
-  {% if context["user"].notes %}
+  {% if context["notes"] %}
 
   <section class="c-notes">
-    {% for note in context["user"].notes %}
+    {% for note in context["notes"] %}
     <article class="c-note" id="note-{{ note.id }}">
       <div class="c-note__wrapper-text">
         <textarea
@@ -75,7 +75,7 @@
     {% endfor %}
   </section>
 
-  {% endif %} {% if not context["user"].notes %}
+  {% endif %} {% if not context["notes"] %}
 
   <section class="c-notes-not-notes">
     <h2 class="c-notes-not-notes__text">No notes have been created yet!</h2>

@@ -1,3 +1,5 @@
+@use "../tools/mixins" as *;
+
 .c-alerts {
   position: absolute;
   top: 0;

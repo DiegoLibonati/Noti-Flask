@@ -14,3 +14,7 @@ export const classOpenNavbar = ".js-open-navbar";
 export const classCloseNavbar = ".js-close-navbar";
 
 export const classInput = ".js-input";
+
+export const classFormLogin = ".c-form-auth-login";
+export const classFormRegister = ".c-form-auth-register";
+export const classBtnLogout = ".js-btn-logout";

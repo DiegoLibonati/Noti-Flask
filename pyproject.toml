@@ -1,0 +1,48 @@
+[project]
+name = "noti"
+version = "1.0.0"
+description = "Noti is a full-stack personal note-taking web application built with Python and Flask, following a clean MVC architecture with a strict separation between the API layer and the server-side rendered views."
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = "."
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+log_cli = true
+log_cli_level = "WARNING"
+addopts = "-v --tb=short"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+env = [
+    "HOST=0.0.0.0",
+    "PORT=5050",
+    "SECRET_KEY=secret_key",
+    "MYSQL_ROOT_PASSWORD=root",
+    "MYSQL_HOST=localhost",
+    "MYSQL_PORT=3307",
+    "MYSQL_USER=noti_user",
+    "MYSQL_PASSWORD=noti_pass",
+    "MYSQL_DB_NAME=noti_db",
+]
+
+
+[tool.ruff]
+line-length = 160
+exclude = [".git", "__pycache__", "env", "venv", "migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP"]
+ignore = ["E203"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

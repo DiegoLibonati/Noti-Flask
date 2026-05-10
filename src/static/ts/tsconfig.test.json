@@ -4,6 +4,6 @@
     "noEmit": true,
     "types": ["jest", "@testing-library/jest-dom", "node"]
   },
-  "include": ["src/static/ts", "tests", "**/*.test.ts", "**/*.spec.ts"],
+  "include": ["src", "__tests__"],
   "exclude": ["node_modules", "dist"]
 }

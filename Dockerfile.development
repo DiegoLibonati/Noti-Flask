@@ -1,27 +1,36 @@
-FROM python:3.11
-
-RUN apt-get update && apt-get install -y curl && \
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs && \
-    rm -rf /var/lib/apt/lists/*
+FROM python:3.11-alpine
 
 WORKDIR /home/app
 
 ENV PYTHONPATH="/home/app"
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 ENV FLASK_ENV=development
 ENV FLASK_DEBUG=1
 
-COPY requirements.txt .
+RUN apk add --no-cache \
+    build-base \
+    libffi-dev \
+    openssl-dev \
+    nodejs \
+    npm
+
+RUN addgroup -S appuser && adduser -S -G appuser appuser
+
+COPY requirements*.txt ./
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir -r requirements.dev.txt
 
-WORKDIR /home/app/src/static/ts
-COPY src/static/ts/package*.json ./
-RUN npm install
+COPY src/static/ts/package*.json ./src/static/ts/
+RUN cd src/static/ts && npm ci
 
-WORKDIR /home/app
-COPY . .
+COPY --chown=appuser:appuser . .
 
-ENV SHELL=/bin/bash
+RUN chmod +x ./entrypoint.development.sh
 
-CMD ["bash", "-c", "cd src/static/ts && node scripts/watch-all.js & python app.py"]
+USER appuser
+
+EXPOSE 5050
+EXPOSE 35729
+
+ENTRYPOINT ["./entrypoint.development.sh"]

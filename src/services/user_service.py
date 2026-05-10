@@ -1,19 +1,10 @@
-from src.constants.codes import CODE_ALREADY_USER_EXISTS
-from src.constants.messages import MESSAGE_ALREADY_USER_EXISTS
 from src.data_access.user_dao import UserDAO
 from src.models.orm.user import User
-from src.utils.exceptions import ConflictAPIError
 
 
 class UserService:
     @staticmethod
     def add_user(user: User) -> User:
-        existing = UserDAO.query_by_username(user.username)
-        if existing:
-            raise ConflictAPIError(
-                code=CODE_ALREADY_USER_EXISTS,
-                message=MESSAGE_ALREADY_USER_EXISTS,
-            )
         return UserDAO.add(user)
 
     @staticmethod

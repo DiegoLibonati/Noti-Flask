@@ -1,41 +1,32 @@
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, TypeVar, cast
+from typing import Any
 
-from flask import Response, flash, redirect, request
 from sqlalchemy.exc import SQLAlchemyError
 
-from config.logger_config import setup_logger
-from src.constants.codes import FLASH_ERROR
-from src.constants.messages import (
-    MESSAGE_ERROR_API,
-    MESSAGE_ERROR_DATABASE,
-    MESSAGE_ERROR_GENERIC,
-)
-from src.utils.exceptions import BaseAPIError
+from src.configs.logger_config import setup_logger
+from src.constants.codes import CODE_ERROR_DATABASE, CODE_ERROR_GENERIC
+from src.constants.messages import MESSAGE_ERROR_DATABASE, MESSAGE_ERROR_GENERIC
+from src.utils.exceptions import BaseAPIError, InternalAPIError
 
 logger = setup_logger(__name__)
 
-F = TypeVar("F", bound=Callable[..., Any])
 
-
-def handle_exceptions(func: F) -> F:
-    @wraps(func)
-    def wrapper(*args: Any, **kwargs: Any) -> Response:
+def handle_exceptions(fn: Callable[..., Any]) -> Callable[..., Any]:
+    @wraps(fn)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
-            return func(*args, **kwargs)
+            return fn(*args, **kwargs)
 
-        except BaseAPIError as e:
-            logger.info(e)
-            flash(MESSAGE_ERROR_API, FLASH_ERROR)
-            return redirect(request.url)
+        except BaseAPIError:
+            raise
 
         except SQLAlchemyError as e:
-            logger.info(e)
-            flash(MESSAGE_ERROR_DATABASE, FLASH_ERROR)
-            return redirect(request.url)
+            logger.error("Database error", exc_info=e)
+            raise InternalAPIError(code=CODE_ERROR_DATABASE, message=MESSAGE_ERROR_DATABASE)
 
         except Exception as e:
-            flash(MESSAGE_ERROR_GENERIC.format(e=str(e)), FLASH_ERROR)
-            return redirect(request.url)
+            logger.error("Unexpected error", exc_info=e)
+            raise InternalAPIError(code=CODE_ERROR_GENERIC, message=MESSAGE_ERROR_GENERIC)
 
-    return cast(F, wrapper)
+    return wrapper

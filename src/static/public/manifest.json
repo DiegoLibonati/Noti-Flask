@@ -1,0 +1,21 @@
+{
+  "name": "Noti",
+  "short_name": "Noti",
+  "description": "Noti is a full-stack personal note-taking web application built with Python and Flask, following a clean MVC architecture with a strict separation between the API layer and the server-side rendered views.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/static/public/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/public/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

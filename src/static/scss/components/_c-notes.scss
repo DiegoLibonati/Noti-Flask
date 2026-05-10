@@ -1,3 +1,5 @@
+@use "../tools/mixins" as *;
+
 .c-notes {
   display: grid;
   align-content: start;

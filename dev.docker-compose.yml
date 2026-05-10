@@ -1,51 +1,56 @@
-version: "3.9"
-
 services:
-  noti-flask:
+  noti:
     build:
       context: .
       dockerfile: Dockerfile.development
-    restart: always
+    restart: unless-stopped
     env_file:
-      - ./.env
+      - .env
     ports:
-      - "5000:5000"
-    depends_on:
-      - noti-db
+      - "5050:5050"
+      - "35729:35729"
     volumes:
-      - .:/home/app           
-      - /home/app/venv                  
+      - .:/home/app
+      - /home/app/src/static/ts/node_modules
+    depends_on:
+      noti-db:
+        condition: service_healthy
     networks:
       - noti-net
 
   noti-db:
     image: mysql:8.0
-    container_name: noti-db
-    restart: always
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_DATABASE: ${MYSQL_DB_NAME}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
-      - noti-db-data:/var/lib/mysql
-      - ./mysql-init:/docker-entrypoint-initdb.d
+      - db-data:/var/lib/mysql
     ports:
       - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     networks:
       - noti-net
 
   adminer:
     image: adminer
-    container_name: noti-adminer
-    restart: always
+    restart: unless-stopped
     ports:
       - "8080:8080"
+    depends_on:
+      - noti-db
     networks:
       - noti-net
 
 volumes:
-  noti-db-data:
+  db-data:
 
 networks:
   noti-net:

@@ -1,0 +1,52 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+*.egg-info
+venv
+.venv
+env
+
+# Node
+src/static/ts/node_modules
+
+# Generated assets (compiled inside container)
+src/static/js
+src/static/css
+
+
+# Environment
+.env
+.env.*
+
+# Docker
+.dockerignore
+Dockerfile*
+docker-compose*
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Dev tools
+.pre-commit-config.yaml
+
+# Tests
+test
+pytest.ini
+requirements.test.txt

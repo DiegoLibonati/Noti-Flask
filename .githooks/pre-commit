@@ -1,0 +1,40 @@
+#!/bin/sh
+# Pre-commit hook for Noti.
+# Runs Ruff on staged Python files and lint-staged on staged frontend files.
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR)
+
+PY_FILES=$(echo "$STAGED_FILES" | grep "\.py$")
+TS_FILES=$(echo "$STAGED_FILES" | grep "^src/static/ts/")
+
+# Resolve ruff from the virtual environment so the hook works without activating it
+if [ -f "$REPO_ROOT/venv/Scripts/ruff" ]; then
+    RUFF="$REPO_ROOT/venv/Scripts/ruff"
+elif [ -f "$REPO_ROOT/venv/bin/ruff" ]; then
+    RUFF="$REPO_ROOT/venv/bin/ruff"
+else
+    RUFF="ruff"
+fi
+
+EXIT_CODE=0
+
+if [ -n "$PY_FILES" ]; then
+    echo "[pre-commit] Running Ruff on staged Python files..."
+    echo "$PY_FILES" | xargs "$RUFF" check --fix
+    EXIT_CODE=$((EXIT_CODE + $?))
+
+    echo "$PY_FILES" | xargs "$RUFF" format
+    EXIT_CODE=$((EXIT_CODE + $?))
+
+    # Re-stage files modified by ruff
+    echo "$PY_FILES" | xargs git add
+fi
+
+if [ -n "$TS_FILES" ]; then
+    echo "[pre-commit] Running lint-staged for frontend..."
+    cd "$REPO_ROOT/src/static/ts" && npx lint-staged
+    EXIT_CODE=$((EXIT_CODE + $?))
+fi
+
+exit $EXIT_CODE
