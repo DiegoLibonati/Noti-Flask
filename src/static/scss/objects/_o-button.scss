@@ -27,30 +27,30 @@
   }
 
   &-fill-primary {
-    color: $white-color;
-    background-color: $primary-color;
+    color: $color-white;
+    background-color: $color-primary;
 
 
     &:hover {
-      background-color: rgba($primary-rgb-color, 0.8);
+      background-color: rgba($color-primary-rgb, 0.8);
     }
   }
 
   &-fill-secondary {
-    color: $white-color;
-    background-color: $secondary-color;
+    color: $color-white;
+    background-color: $color-secondary;
 
     &:hover {
-      background-color: rgba($secondary-rgb-color, 0.8);
+      background-color: rgba($color-secondary-rgb, 0.8);
     }
   }
 
   &-fill-error {
-    color: $white-color;
-    background-color: $error-color;
+    color: $color-white;
+    background-color: $color-error;
 
     &:hover {
-      background-color: rgba($error-rgb-color, 0.8);
+      background-color: rgba($color-error-rgb, 0.8);
     }
   }
 }

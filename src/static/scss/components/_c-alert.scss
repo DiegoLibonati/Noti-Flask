@@ -10,7 +10,7 @@
   height: auto;
   width: 100%;
   padding: 1rem;
-  box-shadow: rgba($black-rgb-color, 0.2) 0rem 0.063rem 0.125rem 0rem;
+  box-shadow: rgba($color-black-rgb, 0.2) 0rem 0.063rem 0.125rem 0rem;
 
   @include lg() {
     width: 40%;
@@ -18,11 +18,11 @@
   }
 
   &--success {
-    background-color: $success-color;
+    background-color: $color-success;
   }
 
   &--error {
-    background-color: $error-color;
+    background-color: $color-error;
   }
 
   &__wrapper-text {
@@ -34,7 +34,7 @@
   &__text {
     font-size: 1rem;
     font-weight: 600;
-    color: $white-color;
+    color: $color-white;
   }
 
   &__btn-close {
@@ -45,7 +45,7 @@
     &-image {
       height: 100%;
       width: 100%;
-      fill: $white-color;
+      fill: $color-white;
     }
   }
 }

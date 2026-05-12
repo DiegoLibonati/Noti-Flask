@@ -12,7 +12,7 @@
   height: 30rem;
   background-color: white;
   padding: 1rem;
-  box-shadow: rgba($black-rgb-color, 0.2) 0rem 0.063rem 0.125rem 0rem;
+  box-shadow: rgba($color-black-rgb, 0.2) 0rem 0.063rem 0.125rem 0rem;
 
   @include md {
     width: 40rem;
@@ -33,7 +33,7 @@
     width: 100%;
     padding: 1rem;
     border: none;
-    background-color: $light-gray-color;
+    background-color: $color-light-gray;
 
     &::placeholder {
       color: black;
@@ -67,7 +67,7 @@
     height: 5rem;
     width: 5rem;
     border-radius: 100%;
-    background-color: $primary-color;
+    background-color: $color-primary;
     padding: 1rem;
 
     @include md {
@@ -80,6 +80,6 @@
 
   &__icon {
     font-size: 2rem;
-    color: $white-color;
+    color: $color-white;
   }
 }
