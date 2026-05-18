@@ -7,28 +7,30 @@ import globals from "globals";
 export default [
   // Archivos ignorados
   {
-    ignores: [
-      "dist/**",
-      "node_modules/**",
-      "coverage/**",
-      "*.config.js",
-      "scripts/**",
-    ],
+    ignores: ["dist/**", "node_modules/**", "coverage/**", "*.config.js"],
   },
 
-  // Reglas base de JS
+  // Reglas base de JS (aplica a .js y .ts)
   js.configs.recommended,
 
-  // Reglas de TypeScript
-  ...typescript.configs.recommended,
-  ...typescript.configs.strictTypeChecked,
-  ...typescript.configs.stylisticTypeChecked,
+  // Reglas de TypeScript: limitadas a archivos .ts para que el parser con
+  // parserOptions.project no se aplique a JS de scripts/.
+  ...typescript.configs.recommended.map((c) => ({ ...c, files: ["**/*.ts"] })),
+  ...typescript.configs.strictTypeChecked.map((c) => ({
+    ...c,
+    files: ["**/*.ts"],
+  })),
+  ...typescript.configs.stylisticTypeChecked.map((c) => ({
+    ...c,
+    files: ["**/*.ts"],
+  })),
 
   // Desactiva reglas que conflictúan con Prettier
   prettierConfig,
 
-  // Configuración global
+  // Configuración global para TypeScript
   {
+    files: ["**/*.ts"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
@@ -88,6 +90,22 @@ export default [
       "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/no-unsafe-call": "off",
       "@typescript-eslint/no-unsafe-argument": "off",
+      "no-console": "off",
+    },
+  },
+
+  // Scripts folder: utilidades Node.js en JS plano, fuera del proyecto TS.
+  // Se coloca al final para que ningún config posterior sobrescriba el parser.
+  {
+    files: ["scripts/**/*.js"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
       "no-console": "off",
     },
   },

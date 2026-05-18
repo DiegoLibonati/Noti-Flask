@@ -4,24 +4,42 @@ from flask import Flask
 
 class TestBlueprintsRegistration:
     @pytest.mark.unit
+    def test_health_blueprint_is_registered(self, app: Flask) -> None:
+        registered: list[str] = list(app.blueprints)
+        assert "health" in registered
+
+    @pytest.mark.unit
     def test_notes_blueprint_is_registered(self, app: Flask) -> None:
-        registered: list[str] = [bp for bp in app.blueprints]
+        registered: list[str] = list(app.blueprints)
         assert "notes" in registered
 
     @pytest.mark.unit
     def test_auth_blueprint_is_registered(self, app: Flask) -> None:
-        registered: list[str] = [bp for bp in app.blueprints]
+        registered: list[str] = list(app.blueprints)
         assert "auth" in registered
 
     @pytest.mark.unit
     def test_app_view_blueprint_is_registered(self, app: Flask) -> None:
-        registered: list[str] = [bp for bp in app.blueprints]
+        registered: list[str] = list(app.blueprints)
         assert "app_view" in registered
 
     @pytest.mark.unit
     def test_auth_view_blueprint_is_registered(self, app: Flask) -> None:
-        registered: list[str] = [bp for bp in app.blueprints]
+        registered: list[str] = list(app.blueprints)
         assert "auth_view" in registered
+
+
+class TestHealthBlueprintRoutes:
+    @pytest.mark.unit
+    def test_health_root_route_exists(self, app: Flask) -> None:
+        rules: list[str] = [str(rule) for rule in app.url_map.iter_rules()]
+        assert "/api/v1/health/" in rules
+
+    @pytest.mark.unit
+    def test_health_endpoint_uses_health_prefix(self, app: Flask) -> None:
+        endpoints: list[str] = [rule.endpoint for rule in app.url_map.iter_rules()]
+        health_endpoints: list[str] = [e for e in endpoints if e.startswith("health.")]
+        assert len(health_endpoints) > 0
 
 
 class TestNoteBlueprintRoutes:

@@ -50,13 +50,17 @@ class TestNoteControllerCreate:
         assert response.status_code in (401, 302)
 
     @pytest.mark.integration
-    def test_create_returns_201_when_authenticated(self, app: Flask, auth_client: FlaskClient, db_session: None) -> None:
+    def test_create_returns_201_when_authenticated(
+        self, app: Flask, auth_client: FlaskClient, db_session: None
+    ) -> None:
         with patch("src.controllers.note_controller.NoteService.add_note", return_value=MagicMock()):
             response = auth_client.post("/api/v1/notes/", json={"content": "hello"})
         assert response.status_code == 201
 
     @pytest.mark.integration
-    def test_create_returns_redirect_path_in_response(self, app: Flask, auth_client: FlaskClient, db_session: None) -> None:
+    def test_create_returns_redirect_path_in_response(
+        self, app: Flask, auth_client: FlaskClient, db_session: None
+    ) -> None:
         with patch("src.controllers.note_controller.NoteService.add_note", return_value=MagicMock()):
             response = auth_client.post("/api/v1/notes/", json={"content": "hello"})
         data: dict = response.get_json()
@@ -78,13 +82,17 @@ class TestNoteControllerDelete:
         assert response.status_code == 200
 
     @pytest.mark.integration
-    def test_delete_returns_404_when_note_not_found(self, app: Flask, auth_client: FlaskClient, db_session: None) -> None:
+    def test_delete_returns_404_when_note_not_found(
+        self, app: Flask, auth_client: FlaskClient, db_session: None
+    ) -> None:
         with patch("src.controllers.note_controller.NoteService.get_note_by_id", return_value=None):
             response = auth_client.delete("/api/v1/notes/999")
         assert response.status_code == 404
 
     @pytest.mark.integration
-    def test_delete_returns_400_for_non_integer_id(self, app: Flask, auth_client: FlaskClient, db_session: None) -> None:
+    def test_delete_returns_400_for_non_integer_id(
+        self, app: Flask, auth_client: FlaskClient, db_session: None
+    ) -> None:
         response = auth_client.delete("/api/v1/notes/abc")
         assert response.status_code == 400
 

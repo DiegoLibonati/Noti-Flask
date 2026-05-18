@@ -74,7 +74,7 @@ class TestNoteDAO:
             user: User = _create_user()
             note: Note = NoteDAO.add(Note(content="x", user_id=user.id))
             with caplog.at_level(logging.CRITICAL, logger="noti"):
-                with patch("src.data_access.note_dao.db") as mock_db:
+                with patch("src.utils.commit_or_rollback_decorator.db") as mock_db:
                     mock_db.session.commit.side_effect = Exception("db error")
                     mock_db.session.rollback = db.session.rollback
                     with pytest.raises(Exception, match="db error"):
@@ -95,8 +95,7 @@ class TestNoteDAO:
             user: User = _create_user()
             note: Note = NoteDAO.add(Note(content="x", user_id=user.id))
             with caplog.at_level(logging.CRITICAL, logger="noti"):
-                with patch("src.data_access.note_dao.db") as mock_db:
-                    mock_db.session.delete = db.session.delete
+                with patch("src.utils.commit_or_rollback_decorator.db") as mock_db:
                     mock_db.session.commit.side_effect = Exception("db error")
                     mock_db.session.rollback = db.session.rollback
                     with pytest.raises(Exception, match="db error"):

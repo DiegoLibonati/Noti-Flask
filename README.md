@@ -25,7 +25,7 @@ From the home dashboard a logged-in user can:
 - **Edit** any of their notes inline — the content is sent to the API via a PATCH request and the DOM is updated in place.
 - **Delete** any note — a DELETE request removes it from the database and the card disappears from the view immediately.
 
-All note mutations go through a REST JSON API (`/api/v1/notes/`) that the TypeScript frontend calls asynchronously, keeping the user experience smooth while the server stays the source of truth.
+All note mutations go through a REST JSON API (`/api/v1/notes/`) that the TypeScript frontend calls asynchronously, keeping the user experience smooth while the server stays the source of truth. A `/api/v1/health/` endpoint is also exposed so Docker, load balancers, and orchestrators can probe application liveness without authenticating.
 
 **Frontend architecture:**
 
@@ -45,11 +45,19 @@ A custom `BaseAPIError` exception class lets any layer raise a typed error that 
 
 **Infrastructure & deployment:**
 
-The application is fully containerized with Docker. The development stack (`dev.docker-compose.yml`) runs Flask with a Livereload/Tornado dev server and a MySQL 8 container, with SCSS and TypeScript watch modes active. The production stack (`prod.docker-compose.yml`) swaps in Gunicorn as the WSGI server behind an Nginx reverse proxy, with a separate MySQL container. Database credentials, ports, and Flask secrets are all configured via environment variables (see the **Env Keys** section). Pre-commit hooks (via `pre-commit` + `.githooks/pre-commit`) enforce code quality on every commit.
+The application is fully containerized with Docker. The development stack (`dev.docker-compose.yml`) runs Flask with a Livereload/Tornado dev server and a MySQL 8 container, with SCSS and TypeScript watch modes active. The production stack (`prod.docker-compose.yml`) swaps in Gunicorn as the WSGI server behind an Nginx reverse proxy, with a separate MySQL container; the production image ships with a `HEALTHCHECK` that hits `/api/v1/health/`. Database credentials, ports, and Flask secrets are all configured via environment variables (see the **Env Keys** section). Pre-commit hooks (via `pre-commit` + `.githooks/pre-commit`) enforce code quality on every commit, and a GitHub Actions workflow (`.github/workflows/ci.yml`) runs lint, audit, tests, and Docker builds on every push and pull request.
 
 ### Endpoints API
 
 The REST API exposed by the Flask backend. All mutations on notes go through these endpoints; the TypeScript frontend consumes them asynchronously.
+
+---
+
+- **Endpoint Name**: Health
+- **Endpoint Method**: GET
+- **Endpoint Prefix**: /api/v1/health/
+- **Endpoint Fn**: Liveness probe — returns `200` with `{code, message}` so orchestrators and Docker `HEALTHCHECK` can verify the app is up
+- **Endpoint Params**: None
 
 ---
 
@@ -161,10 +169,12 @@ Deploy:
 
 Dev tooling:
 
-1. Ruff (Python linter)
-2. ESLint + Prettier (TypeScript linter/formatter)
-3. Husky + lint-staged (Git hooks for JS)
-4. pre-commit (Git hooks for Python)
+1. Ruff (Python linter/formatter)
+2. mypy (Python static type checker)
+3. ESLint + Prettier (TypeScript linter/formatter)
+4. lint-staged + shared `.githooks` (Git hooks for JS, no Husky)
+5. pre-commit (Git hooks for Python — Ruff + mypy)
+6. GitHub Actions (CI: backend lint/audit/test → frontend lint/audit/test/build → Docker dev & prod image builds)
 
 ## Libraries used
 
@@ -190,18 +200,23 @@ No runtime dependencies in package.json
 "eslint-plugin-prettier": "^5.5.5"
 "globals": "^17.3.0"
 "globby": "^15.0.0"
-"husky": "^9.1.7"
 "jest": "^30.3.0"
 "jest-environment-jsdom": "^30.3.0"
 "lint-staged": "^16.2.7"
+"msw": "2.10.4"
 "prettier": "^3.8.1"
 "ts-jest": "^29.4.6"
 "tsc-alias": "^1.8.16"
 "typescript": "^5.6.3"
 "typescript-eslint": "^8.54.0"
+"undici": "^7.25.0"
 ```
 
-#### Flask requirements.txt
+#### Python dependencies (PEP 621)
+
+All Python dependencies are declared in `pyproject.toml` under `[project] dependencies` (runtime) and `[project.optional-dependencies]` (`dev` and `test` extras). The `requirements*.txt` files are thin pip-installable shortcuts that re-export those groups.
+
+#### Runtime (`[project.dependencies]`)
 
 ```
 flask==3.1.3
@@ -214,20 +229,20 @@ pymysql==1.1.3
 cryptography==48.0.0
 ```
 
-#### Flask requirements.dev.txt
+#### Dev (`[project.optional-dependencies]` dev)
 
 ```
--r requirements.txt
 livereload==2.7.0
 pre-commit==4.3.0
 pip-audit==2.7.3
 ruff==0.11.12
+mypy==1.13.0
 ```
 
-#### Flask requirements.test.txt
+#### Test (`[project.optional-dependencies]` test)
 
 ```
-pytest==8.4.2
+pytest==9.0.3
 pytest-env==1.1.5
 pytest-cov==4.1.0
 pytest-timeout==2.3.1
@@ -301,12 +316,19 @@ Pre-commit hooks (Ruff lint + format, pip-audit) run automatically on every `git
    source venv/bin/activate       # Linux / macOS
    ```
 
-2. **Install all Python dependencies:**
+2. **Install all Python dependencies** (PEP 621 extras declared in `pyproject.toml`):
 
    ```sh
-   pip install -r requirements.txt
-   pip install -r requirements.dev.txt
-   pip install -r requirements.test.txt
+   pip install --upgrade pip
+   pip install -e ".[dev,test]"
+   ```
+
+   Or install each group separately:
+
+   ```sh
+   pip install -e .            # runtime
+   pip install -e ".[dev]"     # + livereload, pre-commit, pip-audit, ruff, mypy
+   pip install -e ".[test]"    # + pytest, pytest-env, pytest-cov, pytest-timeout, pytest-xdist
    ```
 
 3. **Install the pre-commit hooks** declared in `.pre-commit-config.yaml`:
@@ -464,7 +486,7 @@ Beyond functional correctness, scan dependencies for known vulnerabilities befor
 > Requires the local virtual environment from [Pre-Commit for Development](#pre-commit-for-development) (so `pip-audit` is installed).
 
 ```sh
-pip-audit -r requirements.txt
+pip-audit --skip-editable
 ```
 
 ### Frontend
@@ -503,6 +525,97 @@ docker compose -f dev.docker-compose.yml build --no-cache
 **Production image** — multi-stage `Dockerfile.production`: a `builder` stage compiles TypeScript and installs Python dependencies; a lean `runner` stage copies only the final artifacts and runs Gunicorn as a non-root user (`appuser`):
 
 ```sh
+docker compose -f prod.docker-compose.yml build --no-cache
+```
+
+## Continuous Integration
+
+The repository ships with a **GitHub Actions** pipeline defined in [`.github/workflows/ci.yml`](.github/workflows/ci.yml). It runs automatically on every `push` and `pull_request` targeting the `main` branch, and re-uses the same commands you can run locally — the ones documented in the [Testing](#testing), [Security Audit](#security-audit), and [Build](#build) sections.
+
+It is a **validation-only pipeline**: nothing is published, tagged, or released. A failure in any earlier job short-circuits the rest, so the cheap checks (lint/type-check) run before the expensive ones (Docker builds).
+
+### Pipeline overview
+
+```
+                ┌─── PR or push to main ───┐
+                ▼                          ▼
+┌────────────────────────────────┐
+│   backend-lint-and-audit       │  ruff (check + format) · mypy · pip-audit
+└────────────────────────────────┘
+                │
+                ▼
+┌────────────────────────────────┐
+│   backend-test                 │  pytest --tb=short
+└────────────────────────────────┘
+                │
+                ▼
+┌────────────────────────────────┐
+│   frontend-lint-and-audit      │  eslint · tsc --noEmit · npm audit (high+)
+└────────────────────────────────┘
+                │
+                ▼
+┌────────────────────────────────┐
+│   frontend-test                │  jest (ts-jest + jsdom)
+└────────────────────────────────┘
+                │
+                ▼
+┌────────────────────────────────┐
+│   frontend-build               │  tsc + tsc-alias
+└────────────────────────────────┘
+                │
+                ▼
+┌──────────────────────────────────────────────────────┐
+│   docker-build  (matrix — runs in parallel)          │
+│   ├── Dockerfile.development → app:dev               │
+│   └── Dockerfile.production  → app:prod              │
+└──────────────────────────────────────────────────────┘
+```
+
+### Jobs
+
+1. **`backend-lint-and-audit`** — installs the `[dev]` extra from `pyproject.toml` on Python 3.11 and runs `ruff check .`, `ruff format --check .`, `mypy --config-file=pyproject.toml .`, and `pip-audit --skip-editable`.
+2. **`backend-test`** — installs the `[test]` extra and runs `python -m pytest --tb=short`.
+3. **`frontend-lint-and-audit`** — installs `src/static/ts` deps with `npm ci --ignore-scripts` (the `--ignore-scripts` flag skips the local Git-hook `prepare` step, which expects a writable `.git` parent not always present in CI) and runs `npm run lint`, `npm run type-check`, and `npm audit --audit-level=high`. The audit step is marked `continue-on-error: true` so transitive advisories don't break the build — they still appear in the logs for review.
+4. **`frontend-test`** — runs `npm run test` (Jest + `ts-jest` + `jest-environment-jsdom`).
+5. **`frontend-build`** — runs `npm run build`, exercising the same `tsc` + `tsc-alias` pipeline documented in [Build → Frontend (TypeScript → JavaScript)](#frontend-typescript--javascript).
+6. **`docker-build`** — uses `docker/setup-buildx-action` plus a matrix to build `Dockerfile.development` and `Dockerfile.production` in parallel **without pushing them anywhere**. It's purely a smoke test that both images still build end-to-end.
+
+### Where the CI outputs live
+
+| Output | Location |
+|---|---|
+| Validation logs (lint, audit, tests, build) | **Actions** tab on GitHub |
+| Docker images (`app:dev`, `app:prod`) | Ephemeral, kept only inside the runner |
+
+> **Note:** the pipeline does not push images to any registry, create Git tags, or publish GitHub Releases. Promoting the production image to a registry is left to the deployment environment.
+
+### Running the same checks locally
+
+```sh
+# 1. backend-lint-and-audit
+ruff check .
+ruff format --check .
+mypy --config-file=pyproject.toml .
+pip-audit --skip-editable
+
+# 2. backend-test
+python -m pytest --tb=short
+
+# 3. frontend-lint-and-audit
+cd src/static/ts
+npm ci --ignore-scripts
+npm run lint
+npm run type-check
+npm audit --audit-level=high
+
+# 4. frontend-test
+npm run test
+
+# 5. frontend-build
+npm run build
+
+# 6. docker-build (from the repo root)
+docker compose -f dev.docker-compose.yml build --no-cache
 docker compose -f prod.docker-compose.yml build --no-cache
 ```
 

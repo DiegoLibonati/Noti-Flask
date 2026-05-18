@@ -1,6 +1,7 @@
 from typing import Any
 
-from flask import Response, jsonify
+from flask import jsonify
+from flask.typing import ResponseReturnValue
 
 from src.constants.codes import CODE_ERROR_INTERNAL_SERVER
 from src.constants.messages import MESSAGE_ERROR_INTERNAL_SERVER
@@ -39,7 +40,7 @@ class BaseAPIError(Exception):
 
         return response
 
-    def flask_response(self) -> Response:
+    def flask_response(self) -> ResponseReturnValue:
         return jsonify(self.to_dict()), self.status_code
 
 

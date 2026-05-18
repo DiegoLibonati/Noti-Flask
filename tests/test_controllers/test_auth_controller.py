@@ -84,7 +84,9 @@ class TestAuthControllerLogout:
         assert response.status_code in (401, 302)
 
     @pytest.mark.integration
-    def test_logout_returns_200_when_authenticated(self, app: Flask, auth_client: FlaskClient, db_session: None) -> None:
+    def test_logout_returns_200_when_authenticated(
+        self, app: Flask, auth_client: FlaskClient, db_session: None
+    ) -> None:
         response = auth_client.get("/api/v1/auth/logout")
         assert response.status_code == 200
 
@@ -111,7 +113,9 @@ class TestAuthControllerSignUp:
         existing_user: MagicMock = MagicMock()
         with patch("src.controllers.auth_controller.UserService.get_user_by_username", return_value=existing_user):
             with patch("src.controllers.auth_controller.UserService.get_user_by_email", return_value=None):
-                response = client.post("/api/v1/auth/sign_up", json={"username": "taken", "password": "p", "email": "new@test.com"})
+                response = client.post(
+                    "/api/v1/auth/sign_up", json={"username": "taken", "password": "p", "email": "new@test.com"}
+                )
         assert response.status_code == 409
 
     @pytest.mark.unit
@@ -119,7 +123,9 @@ class TestAuthControllerSignUp:
         existing_user: MagicMock = MagicMock()
         with patch("src.controllers.auth_controller.UserService.get_user_by_username", return_value=None):
             with patch("src.controllers.auth_controller.UserService.get_user_by_email", return_value=existing_user):
-                response = client.post("/api/v1/auth/sign_up", json={"username": "new", "password": "p", "email": "taken@test.com"})
+                response = client.post(
+                    "/api/v1/auth/sign_up", json={"username": "new", "password": "p", "email": "taken@test.com"}
+                )
         assert response.status_code == 409
 
     @pytest.mark.unit
@@ -128,5 +134,8 @@ class TestAuthControllerSignUp:
         with patch("src.controllers.auth_controller.UserService.get_user_by_username", return_value=None):
             with patch("src.controllers.auth_controller.UserService.get_user_by_email", return_value=None):
                 with patch("src.controllers.auth_controller.UserService.add_user", return_value=new_user):
-                    response = client.post("/api/v1/auth/sign_up", json={"username": "newuser", "password": "pass", "email": "new@test.com"})
+                    response = client.post(
+                        "/api/v1/auth/sign_up",
+                        json={"username": "newuser", "password": "pass", "email": "new@test.com"},
+                    )
         assert response.status_code == 201

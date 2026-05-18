@@ -1,6 +1,10 @@
+import { http, HttpResponse } from "msw";
+
 import type { ResponseWithRedirect } from "@/types/responses";
 
 import authService from "@/services/authService";
+
+import { mockMswServer } from "@tests/__mocks__/mswServer.mock";
 
 const mockRedirectResponse: Partial<ResponseWithRedirect> = {
   code: "200",
@@ -8,33 +12,36 @@ const mockRedirectResponse: Partial<ResponseWithRedirect> = {
   redirect_to: "/dashboard",
 };
 
-const mockFetchSuccess = (data: unknown): void => {
-  global.fetch = jest.fn().mockResolvedValue({
-    ok: true,
-    json: async () => await data,
-  });
-};
-
-const mockFetchNetworkError = (message = "Network error"): void => {
-  global.fetch = jest.fn().mockRejectedValue(new Error(message));
-};
-
 describe("authService", () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
   describe("logout", () => {
     describe("when request succeeds", () => {
-      it("should call fetch with the correct URL", async () => {
-        mockFetchSuccess(mockRedirectResponse);
+      it("should hit GET /api/v1/auth/logout", async () => {
+        let capturedUrl: string | undefined;
+        let capturedMethod: string | undefined;
+
+        mockMswServer.use(
+          http.get("*/api/v1/auth/logout", ({ request }) => {
+            capturedUrl = new URL(request.url).pathname;
+            capturedMethod = request.method;
+            return HttpResponse.json(mockRedirectResponse);
+          })
+        );
+
         await authService.logout();
-        expect(fetch).toHaveBeenCalledWith("/api/v1/auth/logout");
+
+        expect(capturedUrl).toBe("/api/v1/auth/logout");
+        expect(capturedMethod).toBe("GET");
       });
 
       it("should return the parsed JSON response", async () => {
-        mockFetchSuccess(mockRedirectResponse);
+        mockMswServer.use(
+          http.get("*/api/v1/auth/logout", () =>
+            HttpResponse.json(mockRedirectResponse)
+          )
+        );
+
         const result = await authService.logout();
+
         expect(result).toEqual(mockRedirectResponse);
       });
 
@@ -43,92 +50,149 @@ describe("authService", () => {
           code: "200",
           message: "OK",
         };
-        mockFetchSuccess(partialResponse);
+        mockMswServer.use(
+          http.get("*/api/v1/auth/logout", () =>
+            HttpResponse.json(partialResponse)
+          )
+        );
+
         const result = await authService.logout();
+
         expect(result).toEqual(partialResponse);
       });
     });
 
     describe("when fetch fails with a network error", () => {
       it("should propagate the error", async () => {
-        mockFetchNetworkError("Network error");
-        await expect(authService.logout()).rejects.toThrow("Network error");
+        mockMswServer.use(
+          http.get("*/api/v1/auth/logout", () => HttpResponse.error())
+        );
+
+        await expect(authService.logout()).rejects.toThrow();
       });
     });
   });
 
   describe("login", () => {
     describe("when request succeeds", () => {
-      it("should call fetch with the correct URL, method, and body", async () => {
-        mockFetchSuccess(mockRedirectResponse);
+      it("should send POST with JSON body containing username and password", async () => {
+        let capturedBody: unknown;
+        let capturedMethod: string | undefined;
+        let capturedContentType: string | null | undefined;
+
+        mockMswServer.use(
+          http.post("*/api/v1/auth/login", async ({ request }) => {
+            capturedBody = await request.json();
+            capturedMethod = request.method;
+            capturedContentType = request.headers.get("content-type");
+            return HttpResponse.json(mockRedirectResponse);
+          })
+        );
+
         await authService.login("testuser", "testpass");
-        expect(fetch).toHaveBeenCalledWith("/api/v1/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: "testuser", password: "testpass" }),
+
+        expect(capturedMethod).toBe("POST");
+        expect(capturedContentType).toContain("application/json");
+        expect(capturedBody).toEqual({
+          username: "testuser",
+          password: "testpass",
         });
       });
 
       it("should return the parsed JSON response", async () => {
-        mockFetchSuccess(mockRedirectResponse);
+        mockMswServer.use(
+          http.post("*/api/v1/auth/login", () =>
+            HttpResponse.json(mockRedirectResponse)
+          )
+        );
+
         const result = await authService.login("testuser", "testpass");
+
         expect(result).toEqual(mockRedirectResponse);
       });
 
       it("should send empty strings when credentials are empty", async () => {
-        mockFetchSuccess(mockRedirectResponse);
+        let capturedBody: unknown;
+
+        mockMswServer.use(
+          http.post("*/api/v1/auth/login", async ({ request }) => {
+            capturedBody = await request.json();
+            return HttpResponse.json(mockRedirectResponse);
+          })
+        );
+
         await authService.login("", "");
-        expect(fetch).toHaveBeenCalledWith("/api/v1/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: "", password: "" }),
-        });
+
+        expect(capturedBody).toEqual({ username: "", password: "" });
       });
     });
 
     describe("when fetch fails with a network error", () => {
       it("should propagate the error", async () => {
-        mockFetchNetworkError();
-        await expect(authService.login("testuser", "testpass")).rejects.toThrow(
-          "Network error"
+        mockMswServer.use(
+          http.post("*/api/v1/auth/login", () => HttpResponse.error())
         );
+
+        await expect(
+          authService.login("testuser", "testpass")
+        ).rejects.toThrow();
       });
     });
   });
 
   describe("register", () => {
     describe("when request succeeds", () => {
-      it("should call fetch with the correct URL, method, and body", async () => {
-        mockFetchSuccess(mockRedirectResponse);
+      it("should send POST to /api/v1/auth/sign_up with username, password and email", async () => {
+        let capturedBody: unknown;
+        let capturedPath: string | undefined;
+        let capturedMethod: string | undefined;
+
+        mockMswServer.use(
+          http.post("*/api/v1/auth/sign_up", async ({ request }) => {
+            capturedBody = await request.json();
+            capturedPath = new URL(request.url).pathname;
+            capturedMethod = request.method;
+            return HttpResponse.json(mockRedirectResponse, { status: 201 });
+          })
+        );
+
         await authService.register("testuser", "testpass", "test@example.com");
-        expect(fetch).toHaveBeenCalledWith("/api/v1/auth/sign_up", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: "testuser",
-            password: "testpass",
-            email: "test@example.com",
-          }),
+
+        expect(capturedPath).toBe("/api/v1/auth/sign_up");
+        expect(capturedMethod).toBe("POST");
+        expect(capturedBody).toEqual({
+          username: "testuser",
+          password: "testpass",
+          email: "test@example.com",
         });
       });
 
       it("should return the parsed JSON response", async () => {
-        mockFetchSuccess(mockRedirectResponse);
+        mockMswServer.use(
+          http.post("*/api/v1/auth/sign_up", () =>
+            HttpResponse.json(mockRedirectResponse, { status: 201 })
+          )
+        );
+
         const result = await authService.register(
           "testuser",
           "testpass",
           "test@example.com"
         );
+
         expect(result).toEqual(mockRedirectResponse);
       });
     });
 
     describe("when fetch fails with a network error", () => {
       it("should propagate the error", async () => {
-        mockFetchNetworkError();
+        mockMswServer.use(
+          http.post("*/api/v1/auth/sign_up", () => HttpResponse.error())
+        );
+
         await expect(
           authService.register("testuser", "testpass", "test@example.com")
-        ).rejects.toThrow("Network error");
+        ).rejects.toThrow();
       });
     });
   });

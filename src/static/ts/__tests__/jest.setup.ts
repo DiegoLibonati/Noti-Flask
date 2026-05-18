@@ -1,5 +1,7 @@
 import "@testing-library/jest-dom";
 
+import { mockMswServer } from "@tests/__mocks__/mswServer.mock";
+
 const originalConsoleError = console.error.bind(console);
 
 console.error = (...args: Parameters<typeof console.error>): void => {
@@ -8,3 +10,15 @@ console.error = (...args: Parameters<typeof console.error>): void => {
     return;
   originalConsoleError(...args);
 };
+
+beforeAll((): void => {
+  mockMswServer.listen({ onUnhandledRequest: "error" });
+});
+
+afterEach((): void => {
+  mockMswServer.resetHandlers();
+});
+
+afterAll((): void => {
+  mockMswServer.close();
+});

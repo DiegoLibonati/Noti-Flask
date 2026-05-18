@@ -1,8 +1,12 @@
 venv
+.venv/
+env/
 __pycache__
-.pytest_cache
+
 .pytest_cache/
 .ruff_cache
+.mypy_cache/
+.tox/
 node_modules
 src/static/js
 src/static/css
@@ -11,7 +15,19 @@ src/static/ts/coverage
 .env
 *.pyc
 *.pyo
-package-lock.json
-yarn.lock
-.coverage
+*.pyd
 
+*.egg-info/
+dist/
+build/
+
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

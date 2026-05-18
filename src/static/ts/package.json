@@ -19,7 +19,7 @@
     "format:check": "prettier --check .",
     "format:all": "prettier --write \"src/**/*.{ts,css}\" \"__tests__/**/*.ts\"",
     "type-check": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "cd ../../.. && git config core.hooksPath .githooks"
   },
   "devDependencies": {
     "sass": "^1.89.0",
@@ -35,15 +35,16 @@
     "eslint-plugin-prettier": "^5.5.5",
     "globals": "^17.3.0",
     "globby": "^15.0.0",
-    "husky": "^9.1.7",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
     "lint-staged": "^16.2.7",
+    "msw": "2.10.4",
     "prettier": "^3.8.1",
     "ts-jest": "^29.4.6",
     "tsc-alias": "^1.8.16",
     "typescript": "^5.6.3",
-    "typescript-eslint": "^8.54.0"
+    "typescript-eslint": "^8.54.0",
+    "undici": "^7.25.0"
   },
   "lint-staged": {
     "*.{ts,js}": [

@@ -1,0 +1,180 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ============================================================
+  # BACKEND — runs first
+  # ============================================================
+  backend-lint-and-audit:
+    name: Backend - Lint & Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.5.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Upgrade pip
+        run: pip install --upgrade pip
+
+      - name: Install dev dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Ruff lint
+        run: ruff check .
+
+      - name: Ruff format check
+        run: ruff format --check .
+
+      - name: mypy
+        run: mypy --config-file=pyproject.toml .
+
+      - name: pip-audit
+        run: pip-audit --skip-editable
+
+  backend-test:
+    name: Backend - Testing
+    runs-on: ubuntu-latest
+    needs: backend-lint-and-audit
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.5.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Upgrade pip
+        run: pip install --upgrade pip
+
+      - name: Install test dependencies
+        run: pip install -e ".[test]"
+
+      - name: Run tests
+        run: python -m pytest --tb=short
+
+  # ============================================================
+  # FRONTEND — runs after backend
+  # ============================================================
+  frontend-lint-and-audit:
+    name: Frontend - Lint & Audit
+    runs-on: ubuntu-latest
+    needs: backend-test
+    defaults:
+      run:
+        working-directory: src/static/ts
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: src/static/ts/.nvmrc
+          cache: npm
+          cache-dependency-path: src/static/ts/package-lock.json
+
+      # `--ignore-scripts` skips the husky `prepare` hook which needs a
+      # writable `.git` parent directory not always present in CI runs.
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: TypeScript type-check
+        run: npm run type-check
+
+      - name: npm audit (high+)
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+  frontend-test:
+    name: Frontend - Testing
+    runs-on: ubuntu-latest
+    needs: frontend-lint-and-audit
+    defaults:
+      run:
+        working-directory: src/static/ts
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: src/static/ts/.nvmrc
+          cache: npm
+          cache-dependency-path: src/static/ts/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run tests
+        run: npm run test
+
+  frontend-build:
+    name: Frontend - Build
+    runs-on: ubuntu-latest
+    needs: frontend-test
+    defaults:
+      run:
+        working-directory: src/static/ts
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: src/static/ts/.nvmrc
+          cache: npm
+          cache-dependency-path: src/static/ts/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build
+        run: npm run build
+
+  # ============================================================
+  # DOCKER — dev and prod images in parallel, after everything
+  # ============================================================
+  docker-build:
+    name: Docker Build - ${{ matrix.tag }}
+    runs-on: ubuntu-latest
+    needs: frontend-build
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile: Dockerfile.development
+            tag: app:dev
+          - dockerfile: Dockerfile.production
+            tag: app:prod
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3.10.0
+
+      - name: Build ${{ matrix.dockerfile }}
+        uses: docker/build-push-action@v6.15.0
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: false
+          tags: ${{ matrix.tag }}

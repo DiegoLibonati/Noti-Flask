@@ -61,3 +61,48 @@ class TestDefaultConfig:
     @pytest.mark.unit
     def test_port_is_integer(self) -> None:
         assert isinstance(DefaultConfig.PORT, int)
+
+    @pytest.mark.unit
+    def test_tz_has_default(self) -> None:
+        assert DefaultConfig.TZ is not None
+        assert isinstance(DefaultConfig.TZ, str)
+
+    @pytest.mark.unit
+    def test_max_content_length_is_integer(self) -> None:
+        assert isinstance(DefaultConfig.MAX_CONTENT_LENGTH, int)
+        assert DefaultConfig.MAX_CONTENT_LENGTH > 0
+
+    @pytest.mark.unit
+    def test_mysql_attributes_are_exposed(self) -> None:
+        assert hasattr(DefaultConfig, "MYSQL_HOST")
+        assert hasattr(DefaultConfig, "MYSQL_USER")
+        assert hasattr(DefaultConfig, "MYSQL_PASSWORD")
+        assert hasattr(DefaultConfig, "MYSQL_PORT")
+        assert hasattr(DefaultConfig, "MYSQL_DB_NAME")
+
+    @pytest.mark.unit
+    def test_sqlalchemy_uri_uses_mysql_driver(self) -> None:
+        assert DefaultConfig.SQLALCHEMY_DATABASE_URI.startswith("mysql+pymysql://")
+
+    @pytest.mark.unit
+    def test_sqlalchemy_uri_includes_mysql_components(self) -> None:
+        uri: str = DefaultConfig.SQLALCHEMY_DATABASE_URI
+        assert str(DefaultConfig.MYSQL_HOST) in uri
+        assert str(DefaultConfig.MYSQL_USER) in uri
+        assert str(DefaultConfig.MYSQL_PASSWORD) in uri
+        assert str(DefaultConfig.MYSQL_PORT) in uri
+        assert str(DefaultConfig.MYSQL_DB_NAME) in uri
+
+    @pytest.mark.unit
+    def test_route_constants_use_blueprint_names(self) -> None:
+        assert DefaultConfig.GET_ALL_NOTES_ROUTE.startswith("notes.")
+        assert DefaultConfig.CREATE_NOTE_ROUTE.startswith("notes.")
+        assert DefaultConfig.DELETE_NOTE_ROUTE.startswith("notes.")
+        assert DefaultConfig.EDIT_NOTE_ROUTE.startswith("notes.")
+
+    @pytest.mark.unit
+    def test_note_route_paths_use_notes_prefix(self) -> None:
+        assert "/notes" in DefaultConfig.GET_ALL_NOTES_ROUTE_PATH
+        assert "/notes" in DefaultConfig.CREATE_NOTE_ROUTE_PATH
+        assert "/notes" in DefaultConfig.DELETE_NOTE_ROUTE_PATH
+        assert "/notes" in DefaultConfig.EDIT_NOTE_ROUTE_PATH

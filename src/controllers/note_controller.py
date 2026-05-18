@@ -1,4 +1,5 @@
-from flask import Response, current_app, flash, jsonify, request
+from flask import current_app, flash, jsonify, request
+from flask.typing import ResponseReturnValue
 from flask_login import current_user, login_required
 
 from src.constants.codes import (
@@ -23,12 +24,12 @@ from src.constants.messages import (
 )
 from src.models.orm.note import Note
 from src.services.note_service import NoteService
-from src.utils.error_handler import handle_exceptions
 from src.utils.exceptions import NotFoundAPIError, ValidationAPIError
+from src.utils.exceptions_decorator import exceptions_decorator
 
 
-@handle_exceptions
-def alive() -> Response:
+@exceptions_decorator
+def alive() -> ResponseReturnValue:
     response = {
         "message": "I am Alive!",
         "version_bp": "1.0.0",
@@ -37,8 +38,8 @@ def alive() -> Response:
     return jsonify(response), 200
 
 
-@handle_exceptions
-def get_all() -> Response:
+@exceptions_decorator
+def get_all() -> ResponseReturnValue:
     notes = NoteService.get_all_notes()
     response = {
         "code": CODE_SUCCESS_GET_ALL_NOTES,
@@ -49,8 +50,8 @@ def get_all() -> Response:
 
 
 @login_required
-@handle_exceptions
-def create() -> Response:
+@exceptions_decorator
+def create() -> ResponseReturnValue:
     body = request.get_json(silent=True) or {}
     content = body.get("content", "").strip()
 
@@ -67,13 +68,13 @@ def create() -> Response:
 
 
 @login_required
-@handle_exceptions
-def delete(id: str) -> Response:
+@exceptions_decorator
+def delete(id: str) -> ResponseReturnValue:
     try:
         note_id = int(id)
     except (ValueError, TypeError):
         flash(MESSAGE_NOT_VALID_INTEGER, FLASH_ERROR)
-        raise ValidationAPIError(code=CODE_NOT_VALID_INTEGER, message=MESSAGE_NOT_VALID_INTEGER)
+        raise ValidationAPIError(code=CODE_NOT_VALID_INTEGER, message=MESSAGE_NOT_VALID_INTEGER) from None
 
     note = NoteService.get_note_by_id(id=note_id)
 
@@ -93,13 +94,13 @@ def delete(id: str) -> Response:
 
 
 @login_required
-@handle_exceptions
-def edit(id: str) -> Response:
+@exceptions_decorator
+def edit(id: str) -> ResponseReturnValue:
     try:
         note_id = int(id)
     except (ValueError, TypeError):
         flash(MESSAGE_NOT_VALID_INTEGER, FLASH_ERROR)
-        raise ValidationAPIError(code=CODE_NOT_VALID_INTEGER, message=MESSAGE_NOT_VALID_INTEGER)
+        raise ValidationAPIError(code=CODE_NOT_VALID_INTEGER, message=MESSAGE_NOT_VALID_INTEGER) from None
 
     body = request.get_json()
     content = body.get("content", "").strip() if body else ""

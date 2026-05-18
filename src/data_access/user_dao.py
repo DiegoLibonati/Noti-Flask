@@ -1,16 +1,14 @@
 from typing import Any
 
-from src.configs.logger_config import setup_logger
 from src.configs.sql_alchemy_config import db
 from src.models.orm.user import User
-
-logger = setup_logger()
+from src.utils.commit_or_rollback_decorator import commit_or_rollback_decorator
 
 
 class UserDAO:
     @staticmethod
     def query_all() -> list[User]:
-        return db.session.execute(db.select(User)).scalars().all()
+        return list(db.session.execute(db.select(User)).scalars().all())
 
     @staticmethod
     def query_by_username(username: str) -> User | None:
@@ -25,28 +23,18 @@ class UserDAO:
         return db.session.get(User, id)
 
     @staticmethod
+    @commit_or_rollback_decorator("adding user")
     def add(user: User) -> User:
         db.session.add(user)
-        db.session.commit()
         return user
 
     @staticmethod
+    @commit_or_rollback_decorator("updating user")
     def update(user: User, data: dict[str, Any]) -> None:
-        try:
-            for key, value in data.items():
-                setattr(user, key, value)
-            db.session.commit()
-        except Exception as ex:
-            db.session.rollback()
-            logger.error("Error updating user", exc_info=ex)
-            raise
+        for key, value in data.items():
+            setattr(user, key, value)
 
     @staticmethod
+    @commit_or_rollback_decorator("deleting user")
     def delete(user: User) -> None:
-        try:
-            db.session.delete(user)
-            db.session.commit()
-        except Exception as ex:
-            db.session.rollback()
-            logger.error("Error deleting user", exc_info=ex)
-            raise
+        db.session.delete(user)

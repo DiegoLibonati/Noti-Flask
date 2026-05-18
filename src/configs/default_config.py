@@ -17,7 +17,8 @@ class DefaultConfig:
 
     SECRET_KEY = os.getenv("SECRET_KEY", "supersecret")
     HOST = os.getenv("HOST", "0.0.0.0")
-    PORT = int(os.getenv("PORT", 5000))
+    PORT = int(os.getenv("PORT", "5000"))
+    MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_LENGTH", str(1 * 1024 * 1024)))
 
     MYSQL_HOST = os.getenv("MYSQL_HOST")
     MYSQL_USER = os.getenv("MYSQL_USER")

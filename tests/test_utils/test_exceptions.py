@@ -113,7 +113,14 @@ class TestExceptionSubclasses:
 
     @pytest.mark.unit
     def test_all_subclasses_inherit_from_base(self) -> None:
-        for cls in [ValidationAPIError, AuthenticationAPIError, NotFoundAPIError, ConflictAPIError, BusinessAPIError, InternalAPIError]:
+        for cls in [
+            ValidationAPIError,
+            AuthenticationAPIError,
+            NotFoundAPIError,
+            ConflictAPIError,
+            BusinessAPIError,
+            InternalAPIError,
+        ]:
             assert issubclass(cls, BaseAPIError)
 
     @pytest.mark.unit

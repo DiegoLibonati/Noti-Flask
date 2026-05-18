@@ -1,4 +1,6 @@
 # ##### SUCCESS #####
+MESSAGE_SUCCESS_HEALTH = "The application is healthy."
+MESSAGE_SUCCESS_READY = "The application is ready to serve requests."
 MESSAGE_SUCCESS_GET_ALL_NOTES = "Notes retrieved successfully."
 MESSAGE_SUCCESS_ADD_NOTE = "Note created successfully."
 MESSAGE_SUCCESS_DELETE_NOTE = "Note deleted successfully."
@@ -24,5 +26,6 @@ MESSAGE_ALREADY_EXISTS_NOTE = "A note with this content already exists."
 MESSAGE_ALREADY_EXISTS_USER = "The entered email or username already exists."
 
 # ##### NOT_FOUND #####
+MESSAGE_NOT_FOUND_ROUTE = "The requested route does not exist."
 MESSAGE_NOT_FOUND_NOTE = "The note does not exist."
 MESSAGE_NOT_FOUND_USER = "The user does not exist."

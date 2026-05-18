@@ -17,16 +17,17 @@ RUN apk add --no-cache \
 
 RUN addgroup -S appuser && adduser -S -G appuser appuser
 
-COPY requirements*.txt ./
+COPY requirements.txt requirements.dev.txt pyproject.toml ./
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.dev.txt
 
-COPY src/static/ts/package*.json ./src/static/ts/
-RUN cd src/static/ts && npm ci
+COPY src/static/ts/package*.json src/static/ts/.npmrc ./src/static/ts/
+RUN cd src/static/ts && npm ci --ignore-scripts
 
 COPY --chown=appuser:appuser . .
 
-RUN chmod +x ./entrypoint.development.sh
+RUN sed -i 's/\r$//' ./entrypoint.development.sh \
+    && chmod +x ./entrypoint.development.sh
 
 USER appuser
 

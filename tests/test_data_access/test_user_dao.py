@@ -93,7 +93,7 @@ class TestUserDAO:
         with app.app_context():
             user: User = UserDAO.add(_make_user("rollback_u", "rb@test.com"))
             with caplog.at_level(logging.CRITICAL, logger="noti"):
-                with patch("src.data_access.user_dao.db") as mock_db:
+                with patch("src.utils.commit_or_rollback_decorator.db") as mock_db:
                     mock_db.session.commit.side_effect = Exception("db error")
                     mock_db.session.rollback = db.session.rollback
                     with pytest.raises(Exception, match="db error"):
@@ -106,3 +106,14 @@ class TestUserDAO:
             user_id: int = user.id
             UserDAO.delete(user)
             assert UserDAO.query_by_id(user_id) is None
+
+    @pytest.mark.integration
+    def test_delete_rollbacks_on_exception(self, app: Flask, db_session: None, caplog) -> None:
+        with app.app_context():
+            user: User = UserDAO.add(_make_user("del_rb", "del_rb@test.com"))
+            with caplog.at_level(logging.CRITICAL, logger="noti"):
+                with patch("src.utils.commit_or_rollback_decorator.db") as mock_db:
+                    mock_db.session.commit.side_effect = Exception("db error")
+                    mock_db.session.rollback = db.session.rollback
+                    with pytest.raises(Exception, match="db error"):
+                        UserDAO.delete(user)

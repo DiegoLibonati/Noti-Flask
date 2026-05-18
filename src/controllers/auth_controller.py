@@ -1,4 +1,5 @@
-from flask import Response, current_app, flash, jsonify, request
+from flask import current_app, flash, jsonify, request
+from flask.typing import ResponseReturnValue
 from flask_login import login_required, login_user, logout_user
 
 from src.configs.logger_config import setup_logger
@@ -25,14 +26,14 @@ from src.constants.messages import (
 from src.models.orm.user import User
 from src.services.encrypt_service import EncryptService
 from src.services.user_service import UserService
-from src.utils.error_handler import handle_exceptions
 from src.utils.exceptions import AuthenticationAPIError, ConflictAPIError, ValidationAPIError
+from src.utils.exceptions_decorator import exceptions_decorator
 
 logger = setup_logger()
 
 
-@handle_exceptions
-def alive() -> Response:
+@exceptions_decorator
+def alive() -> ResponseReturnValue:
     response = {
         "message": "I am Alive!",
         "version_bp": "1.0.0",
@@ -41,8 +42,8 @@ def alive() -> Response:
     return jsonify(response), 200
 
 
-@handle_exceptions
-def login() -> Response:
+@exceptions_decorator
+def login() -> ResponseReturnValue:
     body = request.get_json(silent=True) or {}
 
     username = body.get("username", "").strip()
@@ -74,8 +75,8 @@ def login() -> Response:
 
 
 @login_required
-@handle_exceptions
-def logout() -> Response:
+@exceptions_decorator
+def logout() -> ResponseReturnValue:
     logout_user()
 
     flash(MESSAGE_SUCCESS_LOGOUT, FLASH_SUCCESS)
@@ -87,8 +88,8 @@ def logout() -> Response:
     return jsonify(response), 200
 
 
-@handle_exceptions
-def sign_up() -> Response:
+@exceptions_decorator
+def sign_up() -> ResponseReturnValue:
     body = request.get_json(silent=True) or {}
 
     username = body.get("username", "").strip()

@@ -1,11 +1,11 @@
 import type { Note } from "@/types/app";
 import type { ResponseWithData, ResponseWithRedirect } from "@/types/responses";
 
-const BASE_URL = "/api/v1/notes/";
+const BASE_URL = "/api/v1/notes";
 
 const noteService = {
   getAll: async (): Promise<ResponseWithData<Note[]>> => {
-    const response = await fetch(BASE_URL);
+    const response = await fetch(`${BASE_URL}/`);
 
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
@@ -13,7 +13,7 @@ const noteService = {
   },
 
   create: async (content: string): Promise<ResponseWithRedirect> => {
-    const response = await fetch(BASE_URL, {
+    const response = await fetch(`${BASE_URL}/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content }),
