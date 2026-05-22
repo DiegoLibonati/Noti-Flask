@@ -1,40 +1,42 @@
 #!/bin/sh
 # Pre-commit hook for Noti.
-# Runs Ruff on staged Python files and lint-staged on staged frontend files.
+# Runs ruff (check --fix, format) and mypy on staged Python files from the
+# project venv, then lint-staged on staged frontend files.
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR)
+cd "$REPO_ROOT" || exit 1
 
+# Resolve the venv python in a cross-platform way.
+if [ -x "$REPO_ROOT/venv/Scripts/python.exe" ]; then
+    PYTHON="$REPO_ROOT/venv/Scripts/python.exe"
+elif [ -x "$REPO_ROOT/venv/bin/python" ]; then
+    PYTHON="$REPO_ROOT/venv/bin/python"
+else
+    echo "[pre-commit] ERROR: no venv python found at venv/Scripts/python.exe or venv/bin/python." >&2
+    echo "[pre-commit] Create one with:  python -m venv venv  &&  pip install -e \".[dev]\"" >&2
+    exit 1
+fi
+
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR)
 PY_FILES=$(echo "$STAGED_FILES" | grep "\.py$")
 TS_FILES=$(echo "$STAGED_FILES" | grep "^src/static/ts/")
-
-# Resolve ruff from the virtual environment so the hook works without activating it
-if [ -f "$REPO_ROOT/venv/Scripts/ruff" ]; then
-    RUFF="$REPO_ROOT/venv/Scripts/ruff"
-elif [ -f "$REPO_ROOT/venv/bin/ruff" ]; then
-    RUFF="$REPO_ROOT/venv/bin/ruff"
-else
-    RUFF="ruff"
-fi
 
 EXIT_CODE=0
 
 if [ -n "$PY_FILES" ]; then
-    echo "[pre-commit] Running Ruff on staged Python files..."
-    echo "$PY_FILES" | xargs "$RUFF" check --fix
-    EXIT_CODE=$((EXIT_CODE + $?))
+    echo "[pre-commit] Running ruff check --fix on staged Python files..."
+    echo "$PY_FILES" | xargs "$PYTHON" -m ruff check --fix || EXIT_CODE=1
 
-    echo "$PY_FILES" | xargs "$RUFF" format
-    EXIT_CODE=$((EXIT_CODE + $?))
+    echo "[pre-commit] Running ruff format on staged Python files..."
+    echo "$PY_FILES" | xargs "$PYTHON" -m ruff format || EXIT_CODE=1
 
-    # Re-stage files modified by ruff
-    echo "$PY_FILES" | xargs git add
+    echo "[pre-commit] Running mypy on staged Python files..."
+    echo "$PY_FILES" | xargs "$PYTHON" -m mypy --config-file=pyproject.toml || EXIT_CODE=1
 fi
 
 if [ -n "$TS_FILES" ]; then
     echo "[pre-commit] Running lint-staged for frontend..."
-    cd "$REPO_ROOT/src/static/ts" && npx lint-staged
-    EXIT_CODE=$((EXIT_CODE + $?))
+    ( cd "$REPO_ROOT/src/static/ts" && npx lint-staged ) || EXIT_CODE=1
 fi
 
 exit $EXIT_CODE

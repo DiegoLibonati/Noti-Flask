@@ -45,7 +45,7 @@ A custom `BaseAPIError` exception class lets any layer raise a typed error that 
 
 **Infrastructure & deployment:**
 
-The application is fully containerized with Docker. The development stack (`dev.docker-compose.yml`) runs Flask with a Livereload/Tornado dev server and a MySQL 8 container, with SCSS and TypeScript watch modes active. The production stack (`prod.docker-compose.yml`) swaps in Gunicorn as the WSGI server behind an Nginx reverse proxy, with a separate MySQL container; the production image ships with a `HEALTHCHECK` that hits `/api/v1/health/`. Database credentials, ports, and Flask secrets are all configured via environment variables (see the **Env Keys** section). Pre-commit hooks (via `pre-commit` + `.githooks/pre-commit`) enforce code quality on every commit, and a GitHub Actions workflow (`.github/workflows/ci.yml`) runs lint, audit, tests, and Docker builds on every push and pull request.
+The application is fully containerized with Docker. The development stack (`dev.docker-compose.yml`) runs Flask with a Livereload/Tornado dev server and a MySQL 8 container, with SCSS and TypeScript watch modes active. The production stack (`prod.docker-compose.yml`) swaps in Gunicorn as the WSGI server behind an Nginx reverse proxy, with a separate MySQL container; the production image ships with a `HEALTHCHECK` that hits `/api/v1/health/`. Database credentials, ports, and Flask secrets are all configured via environment variables (see the **Env Keys** section). A shared `.githooks/pre-commit` shell hook (activated with `git config core.hooksPath .githooks`) enforces code quality on every commit, and a GitHub Actions workflow (`.github/workflows/ci.yml`) runs lint, audit, tests, and Docker builds on every push and pull request.
 
 ### Endpoints API
 
@@ -172,9 +172,8 @@ Dev tooling:
 1. Ruff (Python linter/formatter)
 2. mypy (Python static type checker)
 3. ESLint + Prettier (TypeScript linter/formatter)
-4. lint-staged + shared `.githooks` (Git hooks for JS, no Husky)
-5. pre-commit (Git hooks for Python — Ruff + mypy)
-6. GitHub Actions (CI: backend lint/audit/test → frontend lint/audit/test/build → Docker dev & prod image builds)
+4. lint-staged + shared `.githooks/pre-commit` shell hook (Ruff + mypy for Python, lint-staged for TS — no Husky, no `pre-commit` framework)
+5. GitHub Actions (CI: backend lint/audit/test → frontend lint/audit/test/build → Docker dev & prod image builds)
 
 ## Libraries used
 
@@ -233,7 +232,6 @@ cryptography==48.0.0
 
 ```
 livereload==2.7.0
-pre-commit==4.3.0
 pip-audit==2.7.3
 ruff==0.11.12
 mypy==1.13.0
@@ -257,7 +255,7 @@ With the stack and libraries above in mind, follow these steps to get a working 
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) — must be running before executing any compose command
 - [Node.js](https://nodejs.org/) 22+ with npm or yarn — required to install frontend dependencies
-- Python 3.11+ — only required if you want to run pre-commit, tests, or migrations outside Docker
+- Python 3.11+ — only required if you want to run the pre-commit hook, tests, or migrations outside Docker
 - Git
 
 ### Setup
@@ -304,9 +302,9 @@ Once running, the services are available at:
 | Flask app | http://localhost:5050 |
 | Adminer (DB UI) | http://localhost:8080 |
 
-### Pre-Commit for Development
+### Local Development Setup
 
-Pre-commit hooks (Ruff lint + format, pip-audit) run automatically on every `git commit`. Setup requires a local Python virtual environment because `pre-commit` is a Python package and is also the same env you'll use for [Migrations](#migrations) and [Testing](#testing).
+The repository ships with a self-contained `.githooks/pre-commit` shell hook that runs Ruff (lint + format) and mypy on staged Python files, and `lint-staged` on staged frontend files. It calls each tool directly from the project's virtual environment — no `pre-commit` framework, no caching/isolation layer. Setup is the same local Python virtual environment used for [Migrations](#local-development-setup) and [Testing](#testing).
 
 1. **Create and activate the virtual environment** at the repository root:
 
@@ -327,20 +325,22 @@ Pre-commit hooks (Ruff lint + format, pip-audit) run automatically on every `git
 
    ```sh
    pip install -e .            # runtime
-   pip install -e ".[dev]"     # + livereload, pre-commit, pip-audit, ruff, mypy
+   pip install -e ".[dev]"     # + livereload, pip-audit, ruff, mypy
    pip install -e ".[test]"    # + pytest, pytest-env, pytest-cov, pytest-timeout, pytest-xdist
    ```
 
-3. **Install the pre-commit hooks** declared in `.pre-commit-config.yaml`:
+3. **Point git at the shared hooks directory** (one-time, per clone):
 
    ```sh
-   pre-commit install
+   git config core.hooksPath .githooks
    ```
 
-   From now on, every `git commit` will trigger the hooks. To run them manually against the entire repo:
+   From now on, every `git commit` triggers `.githooks/pre-commit`. To run the same checks manually against the entire repo:
 
    ```sh
-   pre-commit run --all-files
+   ruff check --fix .
+   ruff format .
+   mypy --config-file=pyproject.toml .
    ```
 
 ## Env Keys
@@ -376,7 +376,7 @@ MYSQL_DB_NAME=noti_db
 
 Schema changes that follow from modifying ORM models are managed through **Flask-Migrate** (Alembic under the hood). Migration scripts live in `migrations/versions/`.
 
-> Requires the local virtual environment from [Pre-Commit for Development](#pre-commit-for-development) and a running MySQL instance (or the dev Docker stack).
+> Requires the local virtual environment from [Local Development Setup](#local-development-setup) and a running MySQL instance (or the dev Docker stack).
 
 **Generate a new migration** after changing or adding a model in `src/models/orm/`:
 
@@ -419,7 +419,7 @@ With migrations applied and the app running, verify behavior end-to-end with the
 
 ### Backend
 
-> Requires the local virtual environment from [Pre-Commit for Development](#pre-commit-for-development).
+> Requires the local virtual environment from [Local Development Setup](#local-development-setup).
 
 **Run all tests:**
 
@@ -483,7 +483,7 @@ Beyond functional correctness, scan dependencies for known vulnerabilities befor
 
 ### Backend
 
-> Requires the local virtual environment from [Pre-Commit for Development](#pre-commit-for-development) (so `pip-audit` is installed).
+> Requires the local virtual environment from [Local Development Setup](#local-development-setup) (so `pip-audit` is installed).
 
 ```sh
 pip-audit --skip-editable

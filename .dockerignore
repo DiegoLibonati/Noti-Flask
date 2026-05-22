@@ -43,9 +43,6 @@ Thumbs.db
 # Logs
 *.log
 
-# Dev tools
-.pre-commit-config.yaml
-
 # Tests
 test
 pytest.ini
