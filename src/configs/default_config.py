@@ -1,5 +1,7 @@
 import os
 
+from dotenv import load_dotenv
+
 from src.constants.vars import (
     APP_VIEW_ROUTE_NAME,
     AUTH_BLUEPRINT_ROUTE_NAME,
@@ -10,6 +12,8 @@ from src.constants.vars import (
     VIEW_APP_PATH,
     VIEW_AUTH_PATH,
 )
+
+load_dotenv()
 
 
 class DefaultConfig:
@@ -55,3 +59,5 @@ class DefaultConfig:
 
     DEBUG = False
     TESTING = False
+
+    CHECK_CONNECTIONS = True

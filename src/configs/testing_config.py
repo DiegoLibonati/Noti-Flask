@@ -9,3 +9,5 @@ class TestingConfig(DefaultConfig):
 
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    CHECK_CONNECTIONS = False

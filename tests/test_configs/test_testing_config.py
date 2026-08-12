@@ -29,3 +29,7 @@ class TestTestingConfig:
     @pytest.mark.unit
     def test_track_modifications_is_false(self) -> None:
         assert TestingConfig.SQLALCHEMY_TRACK_MODIFICATIONS is False
+
+    @pytest.mark.unit
+    def test_check_connections_is_false(self) -> None:
+        assert TestingConfig.CHECK_CONNECTIONS is False

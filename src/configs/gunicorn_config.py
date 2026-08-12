@@ -1,6 +1,10 @@
 import multiprocessing
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 bind = f"{os.getenv('HOST', '0.0.0.0')}:{os.getenv('PORT', '5050')}"
 
 workers = multiprocessing.cpu_count() * 2 + 1

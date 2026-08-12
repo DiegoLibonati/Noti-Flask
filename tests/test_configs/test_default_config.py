@@ -101,6 +101,10 @@ class TestDefaultConfig:
         assert DefaultConfig.EDIT_NOTE_ROUTE.startswith("notes.")
 
     @pytest.mark.unit
+    def test_check_connections_is_true(self) -> None:
+        assert DefaultConfig.CHECK_CONNECTIONS is True
+
+    @pytest.mark.unit
     def test_note_route_paths_use_notes_prefix(self) -> None:
         assert "/notes" in DefaultConfig.GET_ALL_NOTES_ROUTE_PATH
         assert "/notes" in DefaultConfig.CREATE_NOTE_ROUTE_PATH

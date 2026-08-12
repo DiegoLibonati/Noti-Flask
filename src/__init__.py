@@ -12,6 +12,7 @@ from src.constants.codes import CODE_ERROR_INTERNAL_SERVER
 from src.constants.messages import MESSAGE_ERROR_INTERNAL_SERVER
 from src.models.orm.user import User
 from src.services.user_service import UserService
+from src.startup.check_connections import check_connections
 from src.utils.exceptions import BaseAPIError
 from src.views.routes import register_views
 
@@ -66,5 +67,7 @@ def create_app(config_name="development"):
         ), 500
 
     app.jinja_env.add_extension("jinja2.ext.loopcontrols")
+
+    check_connections(app)
 
     return app

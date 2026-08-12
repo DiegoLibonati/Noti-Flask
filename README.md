@@ -40,6 +40,7 @@ The Flask application factory (`create_app`) wires together:
 - **DAOs (Data Access Objects)** — the only layer that talks to SQLAlchemy directly.
 - **ORM models** — `User` and `Note`, defined with SQLAlchemy's typed `Mapped` columns.
 - **Flask-Migrate** — handles all database schema migrations via Alembic.
+- **Startup connection checks** (`src/startup/check_connections.py`) — at the end of `create_app`, the factory pings MySQL (`SELECT 1`) up to 5 times with a 2s delay between attempts and a 3s connect timeout per attempt. If the database is unreachable after all attempts, the app logs a warning and **boots anyway** — it never crashes because a service is down; DB-dependent features simply fail until the connection recovers. The check is gated by the `CHECK_CONNECTIONS` config flag (`True` by default, `False` in `TestingConfig` so the test suite never touches the network).
 
 A custom `BaseAPIError` exception class lets any layer raise a typed error that the Flask error handler automatically converts into a consistent JSON response with the correct HTTP status code.
 
@@ -225,7 +226,8 @@ flask-login==0.6.3
 werkzeug==3.1.8
 gunicorn==23.0.0
 pymysql==1.1.3
-cryptography==48.0.0
+cryptography==50.0.0
+python-dotenv==1.2.2
 ```
 
 #### Dev (`[project.optional-dependencies]` dev)
@@ -302,6 +304,22 @@ Once running, the services are available at:
 | Flask app | http://localhost:5050 |
 | Adminer (DB UI) | http://localhost:8080 |
 
+### Running without Docker
+
+The app can also run directly on the host — `.env` is honored either way thanks to `python-dotenv` (see [Env Keys](#env-keys) for how loading works).
+
+1. Set up the local virtual environment as described in [Local Development Setup](#local-development-setup) (`pip install -e ".[dev]"` is enough to run the app).
+
+2. Create `.env` from `.env.example` and point `MYSQL_HOST` at a reachable MySQL instance — e.g. `127.0.0.1` with the dev stack's database container running (`docker compose -f dev.docker-compose.yml up noti-db -d`), or any other local MySQL.
+
+3. Start the dev server from the repo root:
+
+   ```sh
+   python app.py
+   ```
+
+The app listens on `HOST:PORT` from `.env` (http://localhost:5050 with the example values). If MySQL is unreachable, startup logs 5 connection warnings (~25s) and the app boots anyway — see **Startup connection checks** in the backend architecture section.
+
 ### Local Development Setup
 
 The repository ships with a self-contained `.githooks/pre-commit` shell hook that runs Ruff (lint + format) and mypy on staged Python files, and `lint-staged` on staged frontend files. It calls each tool directly from the project's virtual environment — no `pre-commit` framework, no caching/isolation layer. Setup is the same local Python virtual environment used for [Migrations](#local-development-setup) and [Testing](#testing).
@@ -347,11 +365,20 @@ The repository ships with a self-contained `.githooks/pre-commit` shell hook tha
 
 The variables loaded from `.env` (created in step 2 of [Setup](#setup)). Defaults provided in `.env.example` work out of the box for local Docker development; production deploys must override `SECRET_KEY` and the MySQL credentials.
 
+**How `.env` is loaded.** There are two load paths, so the file is honored with or without Docker:
+
+- **Docker** — both compose stacks declare `env_file: .env`, so Docker injects the values as real environment variables into the containers.
+- **Without Docker** — `load_dotenv()` runs at import time in the two modules that read environment variables: `src/configs/default_config.py` (Flask config, imported by both `app.py` and `wsgi.py`) and `src/configs/gunicorn_config.py` (loaded directly by Gunicorn, outside Flask). No other entry point needs to load it.
+
+**Precedence** — `load_dotenv()` never overrides existing variables, so: real environment variables > `.env` values > coded defaults. CI has no `.env`, so coded defaults (plus the values pytest-env sets) apply there.
+
 | Key | Description |
 |---|---|
+| `TZ` | Timezone for the app/container (defaults to `America/Argentina/Buenos_Aires`). |
 | `HOST` | Network interface where Flask listens (`0.0.0.0` to accept all connections). |
 | `PORT` | Port where the Flask app is exposed inside the container. |
 | `SECRET_KEY` | Flask secret key used for session signing and CSRF protection. Use a long random string in production. |
+| `MAX_CONTENT_LENGTH` | Maximum request body size in bytes accepted by Flask (`1048576` = 1 MiB). |
 | `MYSQL_ROOT_PASSWORD` | Root password for the MySQL service. Used internally by Docker for initialization only. |
 | `MYSQL_HOST` | Hostname of the MySQL container in the Docker network (service name in Compose). |
 | `MYSQL_PORT` | Port where MySQL listens inside the Docker network (`3306`). |
@@ -360,9 +387,12 @@ The variables loaded from `.env` (created in step 2 of [Setup](#setup)). Default
 | `MYSQL_DB_NAME` | Name of the MySQL database created automatically by the container. |
 
 ```sh
+TZ="America/Argentina/Buenos_Aires"
+
 HOST="0.0.0.0"
 PORT=5050
 SECRET_KEY="secret_key"
+MAX_CONTENT_LENGTH=1048576
 
 MYSQL_ROOT_PASSWORD=root
 MYSQL_HOST=noti-db
@@ -643,6 +673,8 @@ On every container start, `entrypoint.production.sh` runs automatically:
 2. Copies compiled static files to a shared Docker volume (consumed by Nginx).
 3. Launches Gunicorn.
 
+Additionally, every worker that builds the app through `create_app` runs the **startup connection checks** described in the backend architecture section: MySQL is pinged up to 5 times (2s between attempts, 3s connect timeout) and, if still unreachable, the app logs a warning and continues serving instead of crashing.
+
 ### Deploy
 
 > Make sure the production image has been built — see [Build → Docker images](#docker-images).
@@ -693,7 +725,7 @@ None at the moment.
 
 ```
 APP VERSION: 0.0.1
-README UPDATED: 10/05/2026
+README UPDATED: 12/08/2026
 AUTHOR: Diego Libonati
 ```
 
